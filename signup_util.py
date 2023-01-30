@@ -11,13 +11,14 @@ class SignUp:
 
 
 class SignUpRole:
-    def __init__(self, title, status, location, date, start_time, end_time):
+    def __init__(self, title, status, location, date, start_time, end_time, full):
         self.title = title
         self.status = status
         self.location = location
         self.date = date
         self.start_time = start_time
         self.end_time = end_time
+        self.full = full
 
 
 WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
@@ -57,8 +58,11 @@ def get_signup_data(url: str) -> SignUp:
     roles = []
     containers = soup.findAll(SIGNUP_CONTAINER[0], attrs=SIGNUP_CONTAINER[1])
     
+    if len(containers) == 0:
+        containers = soup.findAll("tr", {"class": "ng-scope", "data-ng-repeat": "i in f.items | limitTo:displayLimit | orderBy:'itemorder'"})
+
     multi_signup = len(containers) > 1
-    print(multi_signup)
+
     
     single_date_in = None
     single_times_in = None
@@ -72,7 +76,18 @@ def get_signup_data(url: str) -> SignUp:
     for s in containers:
         role = None
         title = s.find(SIGNUP_TITLE[0], attrs=SIGNUP_TITLE[1])
-        status = s.find(SIGNUP_STATUS[0], attrs=SIGNUP_STATUS[1])
+
+        status_temp = s.find(SIGNUP_STATUS[0], attrs=SIGNUP_STATUS[1]).text
+        status_array = status_temp.split(" ")
+        status = None
+        full = False
+        if "all" in status_temp.lower():
+            status = f"{status_array[1]}/{status_array[1]}"
+            full = True
+        elif "available" in status_temp.lower():
+            status = f"0/{status_array[0]}"
+        else:
+            status = f"{status_array[0]}/{status_array[2]}"
 
         if multi_signup:
             location = s.find(MULTI_LOCATION[0], attrs=MULTI_LOCATION[1])
@@ -84,20 +99,21 @@ def get_signup_data(url: str) -> SignUp:
             end_time = spec_times[1]
 
             role = SignUpRole(title.text,
-                            status.text,
+                            status,
                             location.text.strip(),
                             date.text,
                             start_time.text.replace("-", ""),
-                            end_time.text)
+                            end_time.text,
+                            full)
 
         else:
             role = SignUpRole(title.text,
-                              status.text,
+                              status,
                               None,
-                              single_date_in.text,
-                              single_times_in[0],
-                              single_times_in[1]
-                              )
+                              single_date_in.text.split(" ")[0],
+                              single_times_in[0].lower(),
+                              single_times_in[1].lower(),
+                              full)
 
         roles.append(role)
 

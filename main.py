@@ -17,7 +17,7 @@ def main():
     print(signup.title)
     print(signup.roles)
     for r in signup.roles:
-        print(r.location)
+        print(r.status)
 
 
 if __name__ == "__main__":
