@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
+from selenium import webdriver
 
 
 class SignUp:
@@ -44,6 +45,15 @@ def get_dynamic_soup(url: str) -> BeautifulSoup:
         soup = BeautifulSoup(page.content(), "html.parser")
         browser.close()
         return soup
+
+
+def get_dynamic_soup_seconday(url: str) -> BeautifulSoup:
+    driver = webdriver.Firefox()
+    driver.get(url)
+    html = driver.page_source
+    soup = BeautifulSoup(html)
+    driver.close()
+    return soup
 
 
 def get_signup_data(url: str) -> SignUp:
