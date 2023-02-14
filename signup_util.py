@@ -38,11 +38,9 @@ SINGLE_TIMES = ("div", {"class": "row hdr-spacer ng-scope", "data-ng-if": "showH
 SINGLE_DATE = ("div", {"class": "row hdr-spacer ng-scope", "data-ng-if": "showHeaderDate()"})
 
 
-def fifix_signupgenius_url(url):
+def fix_signupgenius_url(url):
     if "signupgenius.com" not in url:
         return None
-
-
 
 
 
@@ -59,6 +57,8 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
             browser.close()
 
             if soup != None: break
+
+            current_try += 1
 
     return soup
 
