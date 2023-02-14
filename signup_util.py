@@ -37,14 +37,30 @@ MULTI_TIMES = ("div", {"class": "signupdata--date-time ng-binding ng-scope"})
 SINGLE_TIMES = ("div", {"class": "row hdr-spacer ng-scope", "data-ng-if": "showHeaderDate() && useTime && timeString != ''"})
 SINGLE_DATE = ("div", {"class": "row hdr-spacer ng-scope", "data-ng-if": "showHeaderDate()"})
 
-def get_dynamic_soup(url: str) -> BeautifulSoup:
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto(url)
-        soup = BeautifulSoup(page.content(), "html.parser")
-        browser.close()
-        return soup
+
+def fifix_signupgenius_url(url):
+    if "signupgenius.com" not in url:
+        return None
+
+
+
+
+
+
+def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
+    current_try = 0
+    soup = None
+    while current_try < retries:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(url)
+            soup = BeautifulSoup(page.content(), "html.parser")
+            browser.close()
+
+            if soup != None: break
+
+    return soup
 
 
 def get_dynamic_soup_seconday(url: str) -> BeautifulSoup:
@@ -57,7 +73,7 @@ def get_dynamic_soup_seconday(url: str) -> BeautifulSoup:
 
 
 def get_signup_data(url: str) -> SignUp:
-    soup = get_dynamic_soup(url)
+    soup = get_dynamic_soup(url, 5)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
     s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])
