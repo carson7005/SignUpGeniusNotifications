@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from selenium import webdriver
+import pandas as pd
 
 
 class SignUp:
@@ -38,6 +39,9 @@ SINGLE_TIMES = ("div", {"class": "row hdr-spacer ng-scope", "data-ng-if": "showH
 SINGLE_DATE = ("div", {"class": "row hdr-spacer ng-scope", "data-ng-if": "showHeaderDate()"})
 
 
+SIGNUP_TABLE = ("table", {"class": "table table-bordered date-sorted showsegments"})
+
+
 def fix_signupgenius_url(url):
     if "signupgenius.com" not in url:
         return None
@@ -70,6 +74,14 @@ def get_dynamic_soup_seconday(url: str) -> BeautifulSoup:
     soup = BeautifulSoup(html)
     driver.close()
     return soup
+
+
+def get_page_tables(url, retries):
+    soup = get_dynamic_soup(url, retries)
+
+    table = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
+    data = pd.read_html(table.prettify(), displayed_only=False)
+    return data
 
 
 def get_signup_data(url: str) -> SignUp:

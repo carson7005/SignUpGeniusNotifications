@@ -22,13 +22,26 @@ def main():
 
 
 def test():
-    a = cutil.send_announcement(6768,
-                            "Python Test",
-                            "This announcement was automatically sent using a Python script",
-                            True)
-    print(a)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("signup_url")
+    args = parser.parse_args()
+
+    tables = sutil.get_page_tables(args.signup_url, 5)
+    for t in tables:
+        t.info()
+        t.to_csv("test/out.csv")
+        print("\n")
+        break
+
+    print(len(tables))
+
+    # a = cutil.send_announcement(6768,
+    #                         "Python Test",
+    #                         "This announcement was automatically sent using a Python script",
+    #                         True)
+    # print(a)
 
 
 if __name__ == "__main__":
-    main()
+    test()
 
