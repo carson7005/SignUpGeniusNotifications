@@ -76,15 +76,39 @@ def get_dynamic_soup_seconday(url: str) -> BeautifulSoup:
     return soup
 
 
-def get_page_tables(url, retries):
+def get_page_table(url, retries):
     soup = get_dynamic_soup(url, retries)
 
     table = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
     data = pd.read_html(table.prettify(), displayed_only=False)
-    return data
+
+    table = data[0]
+    print(table)
+    
+    slot_label = "Available Slot"
+    if slot_label not in table.columns:
+        slot_label = "Volunteer"
+    for i in range(len(table[slot_label])):
+        s = table[slot_label][i]
+        if(str(s) == "nan"): table = table.drop(i)
+
+    table = table.reset_index()
+    return table
 
 
-def get_signup_data(url: str) -> SignUp:
+def get_signup_data(url: str, retries):
+    tables = sutil.get_page_tables(args.signup_url, retries)
+    table = tables[0]
+    print(table)
+
+    for i in range(len(table["Available Slot"])):
+        print(i)
+        s = table["Available Slot"][i]
+        if(str(s) == "nan"): table = table.drop(i)
+
+
+
+def get_signup_data_old(url: str) -> SignUp:
     soup = get_dynamic_soup(url, 5)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
