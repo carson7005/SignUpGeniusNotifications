@@ -196,4 +196,5 @@ tags
 # Custom
 test/
 canvas_token.json
+google_credentials.json
 
