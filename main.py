@@ -26,14 +26,9 @@ def test():
     parser.add_argument("signup_url")
     args = parser.parse_args()
 
-    table = sutil.get_page_table(args.signup_url, 5)
-    print(table)
-    
-    # a = cutil.send_announcement(6768,
-    #                         "Python Test",
-    #                         "This announcement was automatically sent using a Python script",
-    #                         True)
-    # print(a)
+    s = sutil.get_signup_data(args.signup_url, 5)
+
+    print(s.title)
 
 
 if __name__ == "__main__":
