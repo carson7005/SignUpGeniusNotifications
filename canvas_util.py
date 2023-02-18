@@ -7,7 +7,6 @@ def send_announcement(course_id, title, message, is_published):
     token_file = open("canvas_token.json")
     data = json.load(token_file)
     token = data["token"]
-    print(token)
 
     PARAMS = {
             "access_token": token,

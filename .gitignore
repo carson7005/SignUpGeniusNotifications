@@ -197,4 +197,6 @@ tags
 test/
 canvas_token.json
 google_credentials.json
+token.pickle
+calendar_data.json
 

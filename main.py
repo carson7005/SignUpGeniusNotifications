@@ -1,5 +1,6 @@
 import signup_util as sutil
 import canvas_util as cutil
+import google_calendar_util as gcalutil
 import argparse
 
 
@@ -21,15 +22,21 @@ def main():
 
 
 def test():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("signup_url")
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument("signup_url")
+    #args = parser.parse_args()
 
-    s = sutil.get_signup_data(args.signup_url, 5)
+    #s = sutil.get_signup_data(args.signup_url, 5)
 
-    print(s.title)
+    #print(s.title)
+
+    events = gcalutil.get_nhs_events(0, 3)
+    for e in events:
+        
+        print(e.description)
+    
 
 
 if __name__ == "__main__":
-    main()
+    test()
 
