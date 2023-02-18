@@ -14,11 +14,10 @@ def main():
     else:
         print("Thinking...")
 
-    signup = sutil.get_signup_data(args.signup_url)
+    signup = sutil.get_signup_data(args.signup_url, 5)
     print(signup.title)
-    print(signup.roles)
     for r in signup.roles:
-        print(r.status)
+        print(r.get_role_string())
 
 
 def test():
@@ -32,5 +31,5 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    main()
 
