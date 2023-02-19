@@ -3,6 +3,7 @@ from playwright.sync_api import sync_playwright
 from selenium import webdriver
 import pandas as pd
 from playwright._impl._api_types import TimeoutError
+import datetime
 
 
 class SignUp:
@@ -11,6 +12,11 @@ class SignUp:
         self.author = author
         self.description = description
         self.roles = roles
+
+    def get_roles_to_notify(self, days_out):
+        now = datetime.date.today()
+        return [r for r in self.roles if not r.full() and \
+                (now - r.get_date_object()).days <= days_out]
 
 
 class SignUpRole:
@@ -31,6 +37,9 @@ class SignUpRole:
             f"   Location: {self.location}" + "\n" + \
             f"   Date: {self.date}" + "\n" + \
             f"   Time: {self.start_time} - {self.end_time}"
+
+    def get_date_object(self):
+        return datetime.datetime.strptime(self.date, "%m/%d/%Y").date()
 
 
 WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
