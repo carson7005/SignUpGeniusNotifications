@@ -20,14 +20,23 @@ def main(days_out):
         roles = signup.get_roles_to_notify(days_out)
 
         if not roles: continue
-
-        signup_string = f"'{signup.title}' needs volunteers in the next {days_out} days:"
+        
+        whole_count = 0
+        signup_string = ""
 
         for r in roles:
-            signup_string += "\n" + f"   {r.needed - r.current} volunteer(s) on {r.date}" + \
+            count = r.needed - r.current
+            signup_string += "\n" + f"   {count} volunteer{'s'[:count^1]} on {r.date}" + \
                     f" from {r.start_time} to {r.end_time}"
 
+            whole_count += count
+
         signup_string += "\n   Url: " + url
+
+        signup_string = f"'{signup.title}' needs {whole_count}" + \
+                f" volunteer{'s'[:whole_count^1]} in the next {days_out} days:" + \
+                signup_string
+
 
         notif_message += "\n\n" + signup_string
 
