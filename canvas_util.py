@@ -3,7 +3,7 @@ import json
 
 BASE_URL = "https://dexterschools.instructure.com/api/v1"
 
-def send_announcement(course_id, title, message, is_published):
+def send_announcement(course_id, title, message, is_published=True):
     token_file = open("canvas_token.json")
     data = json.load(token_file)
     token = data["token"]

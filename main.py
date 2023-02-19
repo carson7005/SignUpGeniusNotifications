@@ -26,22 +26,25 @@ def main(days_out):
 
         for r in roles:
             count = r.needed - r.current
-            signup_string += "\n" + f"   {count} volunteer{'s'[:count^1]} on {r.date}" + \
+            signup_string += "\n" + f"   {count} slot{'s'[:count^1]} on {r.date}" + \
                     f" from {r.start_time} to {r.end_time}"
+
+            if r.location != None:
+                signup_string += f" at {r.location}"
 
             whole_count += count
 
-        signup_string += "\n   Url: " + url
+        signup_string += "\n" + f"   Url: <a href={url}>{url}</a>"
 
-        signup_string = f"'{signup.title}' needs {whole_count}" + \
-                f" volunteer{'s'[:whole_count^1]} in the next {days_out} days:" + \
+        signup_string = f"'{signup.title}' has {whole_count} volunteering" + \
+                f" slot{'s'[:whole_count^1]} available in the next {days_out} days:" + \
                 signup_string
 
 
         notif_message += "\n\n" + signup_string
 
     print(notif_message)
-        
+    cutil.send_announcement(6768, notif_title, notif_message.replace("\n", "<br>"))        
 
 
 def get_signup_from_event(cal_event, retries):
