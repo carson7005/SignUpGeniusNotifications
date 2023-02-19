@@ -16,7 +16,8 @@ class SignUp:
     def get_roles_to_notify(self, days_out):
         now = datetime.date.today()
         return [r for r in self.roles if not r.full() and \
-                (now - r.get_date_object()).days <= days_out]
+                (r.get_date_object() - now).days <= days_out and \
+                (r.get_date_object() - now).days >= 0]
 
 
 class SignUpRole:

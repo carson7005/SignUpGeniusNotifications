@@ -5,20 +5,34 @@ import argparse
 from datetime import date, timedelta
 
 
-def main():
+def main(days_out):
+    current_date_str = date.today().strftime("%m/%d/%Y")
+    notif_title = f"Update for SignUps ({current_date_str})"
+    notif_message = notif_title
     events = gcalutil.get_nhs_events()
     for e in events:
-        signup = get_signup_from_event(e, 5)
+        signup_data = get_signup_from_event(e, 5)
 
-        if signup == None: continue
+        if signup_data == None: continue
 
-        roles = signup.get_roles_to_notify(3)
+        signup, url = signup_data[0], signup_data[1]
+
+        roles = signup.get_roles_to_notify(days_out)
 
         if not roles: continue
 
-        print(roles)
-        
+        signup_string = f"'{signup.title}' needs volunteers in the next {days_out} days:"
 
+        for r in roles:
+            signup_string += "\n" + f"   {r.needed - r.current} volunteer(s) on {r.date}" + \
+                    f" from {r.start_time} to {r.end_time}"
+
+        signup_string += "\n   Url: " + url
+
+        notif_message += "\n\n" + signup_string
+
+    print(notif_message)
+        
 
 
 def get_signup_from_event(cal_event, retries):
@@ -28,11 +42,11 @@ def get_signup_from_event(cal_event, retries):
 
         if url == None: continue
 
-        return sutil.get_signup_data(url, retries)
+        return sutil.get_signup_data(url, retries), url
     
     return None
 
 
 if __name__ == "__main__":
-    main()
+    main(3)
 
