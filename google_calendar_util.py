@@ -1,21 +1,35 @@
 from gcsa.google_calendar import GoogleCalendar
 import json
-import datetime
+from datetime import date, timedelta
+import re
+
 
 gc = GoogleCalendar(credentials_path="google_credentials.json")
 
 def get_nhs_calendar():
+    return gc.get_calendar(get_nhs_calendar_id())
+
+def get_nhs_calendar_id():
     calendar_file = open("calendar_data.json")
     data = json.load(calendar_file)
     calendar_file.close()
+    return data["nhs_calendar"]
 
-    return gc.get_calendar(data["nhs_calendar"])
+def get_nhs_events():
+    now = date.today()
+    nhs_calendar = get_nhs_calendar_id()
 
+    events = gc.get_events(now, calendar_id=nhs_calendar, timezone="EST")
+    descriptions, filtered_events = [], []
+    for e in events:
+        if e.description == None: continue
 
-def get_nhs_events(days_from, days_to):
-    now = datetime.datetime.now()
-    d_from = now + datetime.timedelta(days=days_from)
-    d_to = now + datetime.timedelta(days=days_to)
-    nhs_calendar = get_nhs_calendar()
-    return gc.get_events(d_from, d_to, calendar_id=nhs_calendar.id)
+        if e.description not in descriptions:
+            descriptions.append(e.description)
+            filtered_events.append(e)
+
+    return filtered_events
+
+def get_raw_description(event):
+    return re.sub('<[^<]+?>', '', event.description).replace("\xa0", " ")
     

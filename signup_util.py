@@ -44,6 +44,8 @@ def fix_signupgenius_url(url):
     if "signupgenius.com" not in url:
         return None
 
+    return url.replace("://m.", "://www.").replace("/#!/showSignUp/", "/go/")
+
 
 def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
     current_try = 0
@@ -73,10 +75,14 @@ def get_page_data(url, retries):
     s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])
 
     s_description_temp = soup.find(WHOLE_DESCRIPTION[0], attrs=WHOLE_DESCRIPTION[1])
-    s_description = s_description_temp.find("p", attrs={"style": "text-align: inherit;"})
+    s_descriptions = s_description_temp.findAll("p")
     description = None
-    if s_description != None:
-        description = s_description.text
+    descriptions = []
+    if len(s_descriptions) > 0:
+        for d in s_descriptions:
+            descriptions.append(d.text)
+
+        description = "\n\n".join(descriptions)
 
     table = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
     data = pd.read_html(table.prettify(), displayed_only=False)
@@ -104,7 +110,6 @@ def get_signup_data(url: str, retries):
     data = get_page_data(url, retries)
 
     table = data["table"]
-    print(data["table"])
 
     roles = []
     for i in range(len(table.index)):
@@ -112,7 +117,7 @@ def get_signup_data(url: str, retries):
 
         date = str(row["Date"]).split("  ")[0]
 
-        location = row["Location"].split("  ")[0]
+        location = str(row["Location"]).split("  ")[0]
         if str(location) == "nan":
             location = None
 
