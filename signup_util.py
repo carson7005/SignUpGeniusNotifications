@@ -7,7 +7,8 @@ import datetime
 
 
 class SignUp:
-    def __init__(self, title, author, description, roles):
+    def __init__(self, url, title, author, description, roles):
+        self.url = url
         self.title = title
         self.author = author
         self.description = description
@@ -18,6 +19,13 @@ class SignUp:
         return [r for r in self.roles if not r.full() and \
                 (r.get_date_object() - now).days <= days_out and \
                 (r.get_date_object() - now).days >= 0]
+
+    def get_roles_to_notify_hourly(self, hours_out):
+        now = datetime.datetime.now()
+        return [r for r in self.roles if not r.full() and \
+                (r.get_time_object() - now).hours <= hours_out and \
+                (r.get_time_object() - now).hours >= 0]
+
 
 
 class SignUpRole:
@@ -39,8 +47,11 @@ class SignUpRole:
             f"   Date: {self.date}" + "\n" + \
             f"   Time: {self.start_time} - {self.end_time}"
 
+    def get_time_object(self):
+        return datetime.datetime.strptime(f"{self.date} {self.start_time}", "%m/%d/%Y %I:%M%p")
+
     def get_date_object(self):
-        return datetime.datetime.strptime(self.date, "%m/%d/%Y").date()
+        return self.get_time_object().date()
 
 
 class DynamicLoadError(Exception):
@@ -170,5 +181,5 @@ def get_signup_data(url: str, retries):
 
         roles.append(SignUpRole(title, current, needed, location, date, start_time, end_time))
 
-    return SignUp(data["title"], data["author"], data["description"], roles)
+    return SignUp(url, data["title"], data["author"], data["description"], roles)
 
