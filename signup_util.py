@@ -44,9 +44,10 @@ class SignUpRole:
 
 
 class DynamicLoadError(Exception):
-    def __init__(self, url):
+    def __init__(self, url, message):
         self.url = url
-        super().__init__(f"Error while loading dynamic soup at '{self.url}'")
+        self.message = message
+        super().__init__(message)
 
 
 WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
@@ -60,7 +61,9 @@ def fix_signupgenius_url(url):
     if "signupgenius.com" not in url:
         return None
 
-    return url.replace("://m.", "://www.").replace("/#!/showSignUp/", "/go/")
+    new_url = url.replace("://m.", "://www.").replace("/#!/showSignUp/", "/go/")
+    if not new_url.endswith("#/"): new_url += "#/"
+    return new_url
 
 
 def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
@@ -81,28 +84,31 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
         except TimeoutError:
             current_try += 1
 
-    if soup == None: raise DynamicLoadError(url)
+    if soup == None: raise DynamicLoadError(url, f"Error while loading dynamic soup at '{url}'")
     return soup
 
 
 def get_page_data(url, retries):
     soup = get_dynamic_soup(url, retries)
+    print(url)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
     s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])
 
-    s_description_temp = soup.find(WHOLE_DESCRIPTION[0], attrs=WHOLE_DESCRIPTION[1])
-    s_descriptions = s_description_temp.findAll("p")
     description = None
-    descriptions = []
-    if len(s_descriptions) > 0:
-        for d in s_descriptions:
-            descriptions.append(d.text)
+    s_description_temp = soup.find(WHOLE_DESCRIPTION[0], attrs=WHOLE_DESCRIPTION[1])
+    if s_description_temp != None:
+        s_descriptions = s_description_temp.findAll("p")
+        
+        descriptions = []
+        if len(s_descriptions) > 0:
+            for d in s_descriptions:
+                descriptions.append(d.text)
 
-        description = "\n\n".join(descriptions)
+            description = "\n\n".join(descriptions)
 
-    table = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
-    data = pd.read_html(table.prettify(), displayed_only=False)
+    tables = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
+    data = pd.read_html(tables.prettify(), displayed_only=False)
 
     table = data[0]
     
