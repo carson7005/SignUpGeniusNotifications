@@ -15,16 +15,16 @@ class SignUp:
         self.roles = roles
 
     def get_roles_to_notify(self, days_out):
-        now = datetime.date.today()
+        now = datetime.datetime.now()
         return [r for r in self.roles if not r.full() and \
-                (r.get_date_object() - now).days <= days_out and \
-                (r.get_date_object() - now).days >= 0]
+                (r.get_time_object() - now).days <= days_out and \
+                (r.get_time_object() - now).days >= 0]
 
     def get_roles_to_notify_hourly(self, hours_out):
         now = datetime.datetime.now()
         return [r for r in self.roles if not r.full() and \
-                (r.get_time_object() - now).hours <= hours_out and \
-                (r.get_time_object() - now).hours >= 0]
+                ((r.get_time_object() - now).total_seconds()) / 3600 <= hours_out and \
+                ((r.get_time_object() - now).total_seconds()) / 3600 >= 0]
 
 
 
@@ -40,18 +40,36 @@ class SignUpRole:
     
     def full(self): return self.current == self.needed
 
-    def get_role_string(self):
+    def get_testing_role_string(self):
         return f"Title: {self.title}" + "\n" + \
             f"   Status: {self.current}/{self.needed}" + "\n" + \
             f"   Location: {self.location}" + "\n" + \
             f"   Date: {self.date}" + "\n" + \
             f"   Time: {self.start_time} - {self.end_time}"
 
+    def get_needed_count(self):
+        return self.needed - self.current
+
+    def get_notification_role_string(self):
+        role_string = ""
+        count = self.get_needed_count()
+        role_string += f"{count} slot{'s'[:count^1]} on {self.date}" + \
+                f" from {self.start_time} to {self.end_time}"
+
+        if self.location != None:
+            role_string += f" at {self.location}"
+
+        return role_string
+
     def get_time_object(self):
         return datetime.datetime.strptime(f"{self.date} {self.start_time}", "%m/%d/%Y %I:%M%p")
 
-    def get_date_object(self):
-        return self.get_time_object().date()
+    def get_end_time_object(self):
+        return datetime.datetime.strptime(f"{self.date} {self.end_time}", "%m/%d/%Y %I:%M%p")
+
+    def get_hours(self):
+        return (self.get_end_time_object() - self.get_time_object()).hours
+
 
 
 class DynamicLoadError(Exception):
@@ -101,7 +119,6 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
 
 def get_page_data(url, retries):
     soup = get_dynamic_soup(url, retries)
-    print(url)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
     s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])

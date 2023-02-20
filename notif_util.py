@@ -7,7 +7,6 @@ from datetime import date, timedelta
 def get_notification_message(days_out, include_when=False):
     notif_message = ""
     signups_notify = get_signups_to_notify(days_out)
-    signup_count = 0
     for signup in signups_notify:
         roles = signup.get_roles_to_notify(days_out)
 
@@ -24,19 +23,13 @@ def get_notification_message(days_out, include_when=False):
         
 
         for r in roles:
-            count = r.needed - r.current
-            signup_string += "\n" + f"   {count} slot{get_plural_suffix(count)} on {r.date}" + \
-                    f" from {r.start_time} to {r.end_time}"
+            signup_string += "\n" + f"   {r.get_notification_role_string()}"
+            whole_count += r.get_needed_count()
 
-            if r.location != None:
-                signup_string += f" at {r.location}"
-
-            whole_count += count
-
-        signup_string += "\n" + f"   Url: <a href={signup.url}>{signup.url}</a>"
+        signup_string += "\n" + f"   Link: <a href={signup.url}>{signup.url}</a>"
 
         signup_string = f"'{signup.title}' has {whole_count} volunteering" + \
-                f" slot{get_plural_suffix(whole_count)} available{when_string}:" + \
+                f" slot{'s'[:whole_count^1]} available{when_string}:" + \
                 signup_string
 
         if notif_message: notif_message += "\n\n"
@@ -48,8 +41,36 @@ def get_notification_message(days_out, include_when=False):
     return notif_message, len(signups_notify)
 
 
-def get_plural_suffix(count):
-    return 's'[:count^1] 
+def get_notification_message_hourly(hours_out, include_when=False):
+    notif_message = ""
+    signups_notify = get_signups_to_notify_hourly(hours_out)
+    for signup in signups_notify:
+        roles = signup.get_roles_to_notify_hourly(hours_out)
+
+        whole_count = 0
+        signup_string = ""
+
+        when_string = f" in the next {hours_out} hour{'s'[:hours_out^1]}"
+        if not include_when:
+            when_string = ""
+
+        for r in roles:
+            signup_string += "\n" + f"   {r.get_notification_role_string()}"
+            whole_count += r.get_needed_count()
+
+        signup_string += "\n" + f"   Link: <a href={signup.url}>{signup.url}</a>"
+
+        signup_string = f"'{signup.title}' has {whole_count} volunteering" + \
+                f" slot{'s'[:whole_count^1]} available{when_string}:" + \
+                signup_string
+
+        if notif_message: notif_message += "\n\n"
+
+        notif_message += signup_string
+
+    notif_message = notif_message.replace("\n", "<br>")
+
+    return notif_message, len(signups_notify)
 
 
 def get_signups_to_notify(days_out):
@@ -103,6 +124,21 @@ def send_weekly_notification():
     notif_message = notif_title + "<br><br>" + notif_message
     default_course = cutil.get_notification_course_id()
     cutil.send_announcement(default_course, notif_title, notif_message)
+
+
+def send_hourly_notification(hours_out, include_when=False):
+    notif_message, signup_count = get_notification_message_hourly(hours_out, include_when)
+
+    if signup_count == 0:
+        print(f"No signups for hourly update ({hours_out} hours), skipping.")
+        return
+
+    current_date_str = date.today().strftime("%m/%d/%Y")
+    notif_title = f"Hourly Update for SignUps ({current_date_str})"
+    notif_message = notif_title + "<br><br>" + notif_message
+    default_course = cutil.get_notification_course_id()
+    cutil.send_announcement(default_course, notif_title, notif_message)
+
 
 
 def get_signup_from_event(cal_event, retries):
