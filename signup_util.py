@@ -43,6 +43,12 @@ class SignUpRole:
         return datetime.datetime.strptime(self.date, "%m/%d/%Y").date()
 
 
+class DynamicLoadError(Exception):
+    def __init__(self, url):
+        self.url = url
+        super().__init__(f"Error while loading dynamic soup at '{self.url}'")
+
+
 WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
 WHOLE_AUTHOR = ("div", {"class": "pull-left signup--creator-name ng-binding"})
 WHOLE_DESCRIPTION = ("p", {"class": "ng-binding", "data-ng-bind-html": "signupInfo.header.description"})
@@ -75,6 +81,7 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
         except TimeoutError:
             current_try += 1
 
+    if soup == None: raise DynamicLoadError(url)
     return soup
 
 

@@ -4,7 +4,7 @@ import google_calendar_util as gcalutil
 from datetime import date, timedelta
 
 
-def get_notification_message(days_out):
+def get_notification_message(days_out, include_when=False):
     notif_message = ""
     events = gcalutil.get_nhs_events()
     signup_count = 0
@@ -25,7 +25,9 @@ def get_notification_message(days_out):
         signup_string = ""
 
         when_string = f"in the next {days_out} days"
-        if days_out == 0:
+        if not include_when:
+            when_string = ""
+        elif days_out == 0:
             when_string = "today"
         elif days_out == 1:
             when_string = "tomorrow"
