@@ -59,11 +59,17 @@ def get_notification_message(days_out, include_when=False):
 
 
 def send_weekly_notification():
+    notif_message, signup_count = get_notification_message(7)
+
+    if signup_count == 0:
+        print("No signups for weekly update, skipping.")
+        return
+
     current_date_str = date.today().strftime("%m/%d/%Y")
     notif_title = f"Weekly Update for SignUps ({current_date_str})"
-    notif_message, signup_count = get_notification_message(7)
     notif_message = notif_title + "<br><br>" + notif_message
-    cutil.send_announcement(6768, notif_title, notif_message)
+    default_course = cutil.get_notification_course_id()
+    cutil.send_announcement(default_course, notif_title, notif_message)
 
 
 
