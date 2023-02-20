@@ -107,14 +107,19 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
                 soup = BeautifulSoup(page.content(), "html.parser")
                 browser.close()
 
-                if soup != None: break
+                if soup != None and is_valid_soup_for_signup(soup): break
 
+                soup = None
                 current_try += 1
         except TimeoutError:
             current_try += 1
 
     if soup == None: raise DynamicLoadError(url, f"Error while loading dynamic soup at '{url}'")
     return soup
+
+
+def is_valid_soup_for_signup(soup):
+    return soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1]) != None
 
 
 def get_page_data(url, retries):
@@ -136,6 +141,7 @@ def get_page_data(url, retries):
             description = "\n\n".join(descriptions)
 
     tables = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
+    if tables == None: raise DynamicLoadError(url, f"Table for signup at '{url}' is null")
     data = pd.read_html(tables.prettify(), displayed_only=False)
 
     table = data[0]
