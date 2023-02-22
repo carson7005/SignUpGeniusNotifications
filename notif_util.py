@@ -112,11 +112,11 @@ def get_signups_to_notify_hourly(hours_out):
 
 
 
-def send_weekly_notification():
-    notif_message, signup_count = get_notification_message(7)
+def send_daily_notification(days_out, include_when=False):
+    notif_message, signup_count = get_notification_message(days_out, include_when)
 
     if signup_count == 0:
-        print("No signups for weekly update, skipping.")
+        print(f"No signups for daily update ({days_out} days), skipping.")
         return
 
     current_date_str = date.today().strftime("%m/%d/%Y")
