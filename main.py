@@ -3,7 +3,7 @@ import schedule
 import time
 
 def hourly_job():
-    nutil.send_hourly_notification(2, True)
+    nutil.send_hourly_notification(2, 1,include_when=True)
     print("Hourly job done.")
 
 def daily_job():
@@ -12,7 +12,7 @@ def daily_job():
 
 def main():
     schedule.every().hour.at(":05").do(hourly_job)
-    schedule.every().monday.at("08:00").do(daily_job)
+    schedule.every().sunday.at("12:00").do(daily_job)
 
     while True:
         schedule.run_pending()

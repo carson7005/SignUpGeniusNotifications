@@ -4,11 +4,11 @@ import google_calendar_util as gcalutil
 from datetime import date, timedelta
 
 
-def get_notification_message(days_out, include_when=False):
+def get_notification_message(days_out, days_from, include_when=False):
     notif_message = ""
-    signups_notify = get_signups_to_notify(days_out)
+    signups_notify = get_signups_to_notify(days_out, days_from)
     for signup in signups_notify:
-        roles = signup.get_roles_to_notify(days_out)
+        roles = signup.get_roles_to_notify(days_out, days_from)
 
         whole_count = 0
         signup_string = ""
@@ -41,11 +41,11 @@ def get_notification_message(days_out, include_when=False):
     return notif_message, len(signups_notify)
 
 
-def get_notification_message_hourly(hours_out, include_when=False):
+def get_notification_message_hourly(hours_out, hours_from, include_when=False):
     notif_message = ""
-    signups_notify = get_signups_to_notify_hourly(hours_out)
+    signups_notify = get_signups_to_notify_hourly(hours_out, hours_from)
     for signup in signups_notify:
-        roles = signup.get_roles_to_notify_hourly(hours_out)
+        roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
 
         whole_count = 0
         signup_string = ""
@@ -73,7 +73,7 @@ def get_notification_message_hourly(hours_out, include_when=False):
     return notif_message, len(signups_notify)
 
 
-def get_signups_to_notify(days_out):
+def get_signups_to_notify(days_out, days_from):
     signups = []
     events = gcalutil.get_nhs_events()
     for e in events:
@@ -83,7 +83,7 @@ def get_signups_to_notify(days_out):
 
         signup, url = signup_data[0], signup_data[1]
 
-        roles = signup.get_roles_to_notify(days_out)
+        roles = signup.get_roles_to_notify(days_out, days_from)
 
         if not roles: continue
 
@@ -92,7 +92,7 @@ def get_signups_to_notify(days_out):
     return signups
 
 
-def get_signups_to_notify_hourly(hours_out):
+def get_signups_to_notify_hourly(hours_out, hours_from):
     signups = []
     events = gcalutil.get_nhs_events()
     for e in events:
@@ -102,7 +102,7 @@ def get_signups_to_notify_hourly(hours_out):
 
         signup, url = signup_data[0], signup_data[1]
 
-        roles = signup.get_roles_to_notify_hourly(hours_out)
+        roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
 
         if not roles: continue
 
@@ -112,8 +112,8 @@ def get_signups_to_notify_hourly(hours_out):
 
 
 
-def send_daily_notification(days_out, include_when=False):
-    notif_message, signup_count = get_notification_message(days_out, include_when)
+def send_daily_notification(days_out, days_from=0, include_when=False):
+    notif_message, signup_count = get_notification_message(days_out, days_from,include_when)
 
     if signup_count == 0:
         print(f"No signups for daily update ({days_out} days), skipping.")
@@ -126,8 +126,8 @@ def send_daily_notification(days_out, include_when=False):
     cutil.send_announcement(default_course, notif_title, notif_message)
 
 
-def send_hourly_notification(hours_out, include_when=False):
-    notif_message, signup_count = get_notification_message_hourly(hours_out, include_when)
+def send_hourly_notification(hours_out, hours_from=0,include_when=False):
+    notif_message, signup_count = get_notification_message_hourly(hours_out, hours_from,include_when)
 
     if signup_count == 0:
         print(f"No signups for hourly update ({hours_out} hours), skipping.")

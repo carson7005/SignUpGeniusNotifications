@@ -14,17 +14,17 @@ class SignUp:
         self.description = description
         self.roles = roles
 
-    def get_roles_to_notify(self, days_out):
+    def get_roles_to_notify(self, days_out, days_from):
         now = datetime.datetime.now()
         return [r for r in self.roles if not r.full() and \
                 (r.get_time_object() - now).days <= days_out and \
-                (r.get_time_object() - now).days >= 0]
+                (r.get_time_object() - now).days >= days_from]
 
-    def get_roles_to_notify_hourly(self, hours_out):
+    def get_roles_to_notify_hourly(self, hours_out, hours_from):
         now = datetime.datetime.now()
         return [r for r in self.roles if not r.full() and \
                 ((r.get_time_object() - now).total_seconds()) / 3600 <= hours_out and \
-                ((r.get_time_object() - now).total_seconds()) / 3600 >= 0]
+                ((r.get_time_object() - now).total_seconds()) / 3600 >= hours_from]
 
 
 
