@@ -4,7 +4,7 @@ import time
 
 
 def main():
-    schedule.every().hour.do(
+    schedule.every().hour.at(":05").do(
             nutil.send_hourly_notification(2, True))
     schedule.every().monday.at("8:00").do(
             nutil.send_daily_notification(7))
