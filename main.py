@@ -2,11 +2,11 @@ import notif_util as nutil
 import schedule
 import time
 
-def hourly_job(t):
+def hourly_job():
     nutil.send_hourly_notification(2, True)
     print("Hourly job done.")
 
-def daily_job(t):
+def daily_job():
     nutil.send_daily_notification(7)
     print("Daily jon done.")
 
