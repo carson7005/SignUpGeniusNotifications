@@ -83,7 +83,10 @@ WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
 WHOLE_AUTHOR = ("div", {"class": "pull-left signup--creator-name ng-binding"})
 WHOLE_DESCRIPTION = ("p", {"class": "ng-binding", "data-ng-bind-html": "signupInfo.header.description"})
 
-SIGNUP_TABLE = ("table", {"class": "table table-bordered date-sorted showsegments"})
+SIGNUP_TABLE = ("table", {"class": "table table-bordered showsegments"})
+SIGNUP_TABLE_CONTAINER = ("div", {"class": "row data-grid ng-scope"})
+
+SIGNUP_EXTRA_DETAILS = ("div", {"class": "row hdr-spacer ng-scope"})
 
 
 def fix_signupgenius_url(url):
@@ -107,7 +110,7 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
                 soup = BeautifulSoup(page.content(), "html.parser")
                 browser.close()
 
-                if soup != None and is_valid_soup_for_signup(soup): break
+                if soup != None and get_signup_table(soup) != None: break
 
                 soup = None
                 current_try += 1
@@ -118,8 +121,10 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
     return soup
 
 
-def is_valid_soup_for_signup(soup):
-    return soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1]) != None
+
+def get_signup_table(soup):
+    table_container = soup.find(SIGNUP_TABLE_CONTAINER[0], SIGNUP_TABLE_CONTAINER[1])
+    return table_container.find("table")
 
 
 def get_page_data(url, retries):
@@ -140,7 +145,7 @@ def get_page_data(url, retries):
 
             description = "\n\n".join(descriptions)
 
-    tables = soup.find(SIGNUP_TABLE[0], SIGNUP_TABLE[1])
+    tables = get_signup_table(soup)
     if tables == None: raise DynamicLoadError(url, f"Table for signup at '{url}' is null")
     data = pd.read_html(tables.prettify(), displayed_only=False)
 
@@ -155,7 +160,8 @@ def get_page_data(url, retries):
 
     table = table.reset_index()
     table = table.drop(columns=["index"])
-    return {
+
+    page_data_object = {
             "table": table,
             "title": s_title.text,
             "author": s_author.text,
@@ -163,36 +169,83 @@ def get_page_data(url, retries):
         }
 
 
+    extra_data = list(soup.findAll(SIGNUP_EXTRA_DETAILS[0], SIGNUP_EXTRA_DETAILS[1]))
+    DETAIL_TITLE_ATT = ("strong", {"class": "ng-binding"})
+    extra_data = [d for d in extra_data if d.find(DETAIL_TITLE_ATT[0], DETAIL_TITLE_ATT[1]).text != "Share"]
+    if len(extra_data) > 0:
+        for d in extra_data:
+            detail_title = d.find(DETAIL_TITLE_ATT[0], DETAIL_TITLE_ATT[1]).text
+            DETAIL_TEXT_ATT = ("div", {"class": "pull-left ng-binding"})
+            match detail_title:
+                case "Date":
+                    detail_text = d.find(DETAIL_TEXT_ATT[0], DETAIL_TEXT_ATT[1]).text
+                    page_data_object["whole_date"] = detail_text.split(" ")[0]
+                case "Time":
+                    detail_text = d.find(DETAIL_TEXT_ATT[0], DETAIL_TEXT_ATT[1]).text
+                    time_array = detail_text.split(" ")
+                    page_data_object["whole_start_time"] = time_array[0]
+                    page_data_object["whole_end_time"] = time_array[2]
+                case "Location":
+                    detail_text = d.find("span", {"class": "ng-binding"}).text
+                    page_data_object["whole_location"] = detail_text
+
+    return page_data_object
+
+
 def get_signup_data(url: str, retries):
     data = get_page_data(url, retries)
 
     table = data["table"]
+    print(table)
 
     roles = []
+
     for i in range(len(table.index)):
         row = table.loc[i]
 
-        date = str(row["Date"]).split("  ")[0]
-
-        location = str(row["Location"]).split("  ")[0]
-        if str(location) == "nan":
-            location = None
-
-        full_time = str(row["Time"]).split("  ")
-        start_time = full_time[0].replace("-", "")
-        end_time = full_time[1]
+        
+        date = None
+        if "Date" in row:
+            date = str(row["Date"]).split("  ")[0]
+        elif "whole_date" in data:
+            date = data["whole_date"]
+        
+        location = None
+        if "Location" in row:
+            location = str(row["Location"]).split("  ")[0]
+            if str(location) == "nan":
+                location = None
+        elif "whole_location" in data:
+            location = data["whole_location"]
+        
+        start_time = None
+        end_time = None
+        if "Time" in row:
+            full_time = str(row["Time"]).split("  ")
+            start_time = full_time[0].replace("-", "")
+            end_time = full_time[1]
+        elif "whole_start_time" in data and "whole_end_time" in data:
+            start_time = data["whole_start_time"]
+            end_time = data["whole_end_time"]
 
         slot_label = "Available Slot"
         if slot_label not in row:
             slot_label = "Volunteer"
 
         slot_array = str(row[slot_label]).split("  ")
+        if len(slot_array) <= 1: continue
                 
         title = slot_array[1]
+        title_check = title.split(" ")[0]
+        title_correction = 0
+        if title_check == "Full" or title_check == "All" or \
+                title_check.isnumeric():
+                    title_correction = 1
+                    title = None
         
         current = 0
         needed = 0
-        status = slot_array[2].split(" ")
+        status = slot_array[2 - title_correction].split(" ")
         if status[0] == "All":
             current = int(status[1])
             needed = current
@@ -203,6 +256,10 @@ def get_signup_data(url: str, retries):
             needed = int(status[2])
 
         roles.append(SignUpRole(title, current, needed, location, date, start_time, end_time))
+
+        if title_correction == 1:
+            print(data)
+            print(roles[len(roles) - 1].get_testing_role_string())
 
     return SignUp(url, data["title"], data["author"], data["description"], roles)
 
