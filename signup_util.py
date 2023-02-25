@@ -196,7 +196,6 @@ def get_signup_data(url: str, retries):
     data = get_page_data(url, retries)
 
     table = data["table"]
-    print(table)
 
     roles = []
 
@@ -257,9 +256,6 @@ def get_signup_data(url: str, retries):
 
         roles.append(SignUpRole(title, current, needed, location, date, start_time, end_time))
 
-        if title_correction == 1:
-            print(data)
-            print(roles[len(roles) - 1].get_testing_role_string())
 
     return SignUp(url, data["title"], data["author"], data["description"], roles)
 
