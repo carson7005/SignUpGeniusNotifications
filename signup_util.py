@@ -83,7 +83,6 @@ WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
 WHOLE_AUTHOR = ("div", {"class": "pull-left signup--creator-name ng-binding"})
 WHOLE_DESCRIPTION = ("p", {"class": "ng-binding", "data-ng-bind-html": "signupInfo.header.description"})
 
-SIGNUP_TABLE = ("table", {"class": "table table-bordered showsegments"})
 SIGNUP_TABLE_CONTAINER = ("div", {"class": "row data-grid ng-scope"})
 
 SIGNUP_EXTRA_DETAILS = ("div", {"class": "row hdr-spacer ng-scope"})
