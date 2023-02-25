@@ -1,9 +1,6 @@
-from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
-from selenium import webdriver
 import pandas as pd
-from playwright._impl._api_types import TimeoutError
 import datetime
+import page_util as putil
 
 
 class SignUp:
@@ -72,13 +69,6 @@ class SignUpRole:
 
 
 
-class DynamicLoadError(Exception):
-    def __init__(self, url, message):
-        self.url = url
-        self.message = message
-        super().__init__(message)
-
-
 WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
 WHOLE_AUTHOR = ("div", {"class": "pull-left signup--creator-name ng-binding"})
 WHOLE_DESCRIPTION = ("p", {"class": "ng-binding", "data-ng-bind-html": "signupInfo.header.description"})
@@ -97,29 +87,6 @@ def fix_signupgenius_url(url):
     return new_url
 
 
-def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
-    current_try = 0
-    soup = None
-    while current_try < retries:
-        try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch()
-                page = browser.new_page()
-                page.goto(url)
-                soup = BeautifulSoup(page.content(), "html.parser")
-                browser.close()
-
-                if soup != None and get_signup_table(soup) != None: break
-
-                soup = None
-                current_try += 1
-        except TimeoutError:
-            current_try += 1
-
-    if soup == None: raise DynamicLoadError(url, f"Error while loading dynamic soup at '{url}'")
-    return soup
-
-
 
 def get_signup_table(soup):
     table_container = soup.find(SIGNUP_TABLE_CONTAINER[0], SIGNUP_TABLE_CONTAINER[1])
@@ -130,7 +97,8 @@ def get_signup_table(soup):
 
 
 def get_page_data(url, retries):
-    soup = get_dynamic_soup(url, retries)
+    print(url)
+    soup = putil.get_selenium_soup(url, retries)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
     s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])
@@ -198,6 +166,7 @@ def get_signup_data(url: str, retries):
     data = get_page_data(url, retries)
 
     table = data["table"]
+    print(table)
 
     roles = []
 
