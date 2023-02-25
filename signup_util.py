@@ -123,6 +123,9 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
 
 def get_signup_table(soup):
     table_container = soup.find(SIGNUP_TABLE_CONTAINER[0], SIGNUP_TABLE_CONTAINER[1])
+    if table_container == None:
+        return None
+
     return table_container.find("table")
 
 
