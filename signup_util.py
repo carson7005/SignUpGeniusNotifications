@@ -96,9 +96,9 @@ def get_signup_table(soup):
     return table_container.find("table")
 
 
-def get_page_data(url, retries):
+def get_page_data(url, retries, browser_instance=None):
     print(url)
-    soup = putil.get_selenium_soup(url, retries)
+    soup = putil.get_selenium_soup(url, retries, browser_instance)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
     s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])
@@ -162,8 +162,8 @@ def get_page_data(url, retries):
     return page_data_object
 
 
-def get_signup_data(url: str, retries):
-    data = get_page_data(url, retries)
+def get_signup_data(url: str, retries, browser_instance=None):
+    data = get_page_data(url, retries, browser_instance)
 
     table = data["table"]
     print(table)

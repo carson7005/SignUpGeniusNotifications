@@ -36,14 +36,18 @@ def get_dynamic_soup(url: str, retries) -> BeautifulSoup:
     return soup
 
 
-def get_selenium_soup(url: str, tries):
+def get_selenium_soup(url: str, tries, browser_instance=None):
     current_try = 0
     soup = None
+    browser = None
     while current_try < tries:
-        ff_options = Options()
-        ff_options.headless = True
-        print("Opening Browser...")
-        browser = webdriver.Firefox(options=ff_options)
+        if not browser_instance:
+            ff_options = Options()
+            ff_options.headless = True
+            print("Opening Browser...")
+            browser = webdriver.Firefox(options=ff_options)
+        else:
+            browser = browser_instance
         print("Getting URL...")
         browser.get(url)
         print("Sleeping...")
@@ -56,6 +60,9 @@ def get_selenium_soup(url: str, tries):
         
         soup = None
         current_try += 1
+
+    if not browser_instance:
+        browser.close()
     
     if soup == None: raise DynamicLoadError(url, f"Error while loading dynamic soup at '{url}'")
     return soup
