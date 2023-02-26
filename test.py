@@ -7,7 +7,7 @@ def main():
     nutil.send_daily_notification(7)
 
     uptime = time.time() - start
-    print(f"Uptime: {uptime}. What the fuck.")
+    print(f"Uptime: {uptime})
 
 
 if __name__ == "__main__":
