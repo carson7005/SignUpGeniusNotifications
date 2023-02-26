@@ -4,6 +4,7 @@ from playwright._impl._api_types import TimeoutError
 import signup_util as sutil
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import TimeoutException
 import time
 
 class DynamicLoadError(Exception):
@@ -41,27 +42,30 @@ def get_selenium_soup(url: str, tries, browser_instance=None):
     soup = None
     browser = None
     while current_try < tries:
-        if not browser_instance:
-            ff_options = Options()
-            ff_options.headless = True
-            print("Opening Browser...")
-            browser = webdriver.Firefox(options=ff_options)
-        else:
-            browser = browser_instance
-        print("Getting URL...")
-        browser.get(url)
-        print("Sleeping...")
-        time.sleep(3)
+        try:
+            if not browser_instance:
+                ff_options = Options()
+                ff_options.headless = True
+                print("Opening Browser...")
+                browser = webdriver.Firefox(options=ff_options)
+            else:
+                browser = browser_instance
+            print("Getting URL...")
+            browser.get(url)
+            print("Sleeping...")
+            time.sleep(3)
 
-        html = browser.page_source
-        soup = BeautifulSoup(html, 'html.parser')
+            html = browser.page_source
+            soup = BeautifulSoup(html, 'html.parser')
 
-        if soup != None and sutil.get_signup_table(soup) != None: break
-        
-        soup = None
-        current_try += 1
+            if soup != None and sutil.get_signup_table(soup) != None: break
+            
+            soup = None
+            current_try += 1
+        except TimeoutException:
+            current_try += 1
 
-    if not browser_instance:
+    if browser:
         browser.close()
     
     if soup == None: raise DynamicLoadError(url, f"Error while loading dynamic soup at '{url}'")
