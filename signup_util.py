@@ -55,11 +55,7 @@ class SignUpRole:
         role_string = ""
         count = self.get_needed_count()
         
-        status_string = ""
-        if self.full():
-            status_string = "FULL volunteering slots"
-        else:
-            status_string = f"{count} slot{'s'[:count^1]}"
+        status_string = f"{count if count > 0 else 'No'} slot{'s'[:count^1]} available"
 
         role_string += f"{status_string} on {self.date}" + \
                 f" from {self.start_time} to {self.end_time}"
