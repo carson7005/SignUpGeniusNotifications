@@ -31,6 +31,22 @@ def get_nhs_events():
 
     return filtered_events
 
+
+def get_all_nhs_events():
+    nhs_calendar = get_nhs_calendar_id()
+
+    events = gc.get_events(calendar_id=nhs_calendar, timezone="EST")
+    descriptions, filtered_events = [], []
+    for e in events:
+        if e.description == None: continue
+
+        if e.description not in descriptions:
+            descriptions.append(e.description)
+            filtered_events.append(e)
+
+    return filtered_events
+
+
 def get_raw_description(event):
     return re.sub('<[^<]+?>', '', event.description).replace("\xa0", " ")
     
