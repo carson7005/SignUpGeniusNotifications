@@ -1,14 +1,15 @@
 import notif_util as nutil
 import schedule
 import time
+import log_util as lutil
 
 def hourly_job():
     nutil.send_hourly_notification(2, 1,include_when=True)
-    print("Hourly job done.")
+    lutil.log("Hourly job done.")
 
 def daily_job():
     nutil.send_daily_notification(7)
-    print("Daily jon done.")
+    lutil.log("Daily jon done.")
 
 def main():
     schedule.every().hour.at(":05").do(hourly_job)

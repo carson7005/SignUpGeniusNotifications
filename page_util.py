@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 import time
+import log_util as lutil
 
 class DynamicLoadError(Exception):
     def __init__(self, url, message):
@@ -46,13 +47,13 @@ def get_selenium_soup(url: str, tries, browser_instance=None):
             if not browser_instance:
                 ff_options = Options()
                 ff_options.headless = True
-                print("Opening Browser...")
+                lutil.log("Opening Browser...")
                 browser = webdriver.Firefox(options=ff_options)
             else:
                 browser = browser_instance
-            print("Getting URL...")
+            lutil.log("Getting URL...")
             browser.get(url)
-            print("Sleeping...")
+            lutil.log("Sleeping...")
             time.sleep(3)
 
             html = browser.page_source

@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime
 import page_util as putil
+import log_util as lutil
 
 
 class SignUp:
@@ -97,7 +98,7 @@ def get_signup_table(soup):
 
 
 def get_page_data(url, retries, browser_instance=None):
-    print(url)
+    lutil.log(f"Getting Data for {url}")
     soup = putil.get_selenium_soup(url, retries, browser_instance)
 
     s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])

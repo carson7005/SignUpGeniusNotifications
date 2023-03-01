@@ -2,6 +2,7 @@ import signup_util as sutil
 import canvas_util as cutil
 import google_calendar_util as gcalutil
 from datetime import date, timedelta
+import log_util as lutil
 
 
 def get_notification_message(days_out, days_from, include_when=False):
@@ -116,7 +117,7 @@ def send_daily_notification(days_out, days_from=0, include_when=False):
     notif_message, signup_count = get_notification_message(days_out, days_from,include_when)
 
     if signup_count == 0:
-        print(f"No signups for daily update ({days_out} days), skipping.")
+        lutil.log(f"No signups for daily update ({days_out} days), skipping.")
         return
 
     current_date_str = date.today().strftime("%m/%d/%Y")
@@ -130,7 +131,7 @@ def send_hourly_notification(hours_out, hours_from=0,include_when=False):
     notif_message, signup_count = get_notification_message_hourly(hours_out, hours_from,include_when)
 
     if signup_count == 0:
-        print(f"No signups for hourly update ({hours_out} hours), skipping.")
+        lutil.log(f"No signups for hourly update ({hours_out} hours), skipping.")
         return
 
     current_date_str = date.today().strftime("%m/%d/%Y")
