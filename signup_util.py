@@ -60,6 +60,7 @@ class SignUpRole:
             status_string = "FULL volunteering slots"
         else:
             status_string = f"{count} slot{'s'[:count^1]}"
+
         role_string += f"{status_string} on {self.date}" + \
                 f" from {self.start_time} to {self.end_time}"
 

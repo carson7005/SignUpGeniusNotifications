@@ -30,7 +30,7 @@ def get_notification_message(days_out, days_from, include_when=False):
             update_string = f"'{signup.title}' has {whole_count} volunteering" + \
                 f" slot{'s'[:whole_count^1]} available{when_string}:"
         else:
-            update_string = f"'{signup.title}' is full{f' and has roles happening{when_string}' if when_string}:"
+            update_string = f"'{signup.title}' is full{f' and has roles happening{when_string}' if when_string else ''}:"
 
         signup_string = update_string + signup_string
 
@@ -67,7 +67,7 @@ def get_notification_message_hourly(hours_out, hours_from, include_when=False):
             update_string = f"'{signup.title}' has {whole_count} volunteering" + \
                 f" slot{'s'[:whole_count^1]} available{when_string}:"
         else:
-            update_string = f"'{signup.title}' is full{f' and has roles happening{when_string}' if when_string}:"
+            update_string = f"'{signup.title}' is full{f' and has roles happening{when_string}' if when_string else ''}:"
 
 
         signup_string = update_string + signup_string
