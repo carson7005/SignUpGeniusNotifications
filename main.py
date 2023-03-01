@@ -12,6 +12,8 @@ def daily_job():
     lutil.log("Daily jon done.")
 
 def main():
+    lutil.log("Starting script...")
+
     schedule.every().hour.at(":05").do(hourly_job)
     schedule.every().sunday.at("12:00").do(daily_job)
 
