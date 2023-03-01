@@ -36,7 +36,7 @@ def get_raw_description(event):
     
 
 def get_signup_from_event(cal_event, retries):
-    desc = gcalutil.get_raw_description(cal_event).split(" ")
+    desc = get_raw_description(cal_event).split(" ")
     for i in desc:
         url = sutil.fix_signupgenius_url(i)
 
