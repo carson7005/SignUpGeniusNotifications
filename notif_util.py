@@ -1,4 +1,3 @@
-import signup_util as sutil
 import canvas_util as cutil
 import google_calendar_util as gcalutil
 from datetime import date, timedelta
@@ -78,7 +77,7 @@ def get_signups_to_notify(days_out, days_from):
     signups = []
     events = gcalutil.get_nhs_events()
     for e in events:
-        signup_data = get_signup_from_event(e, 5)
+        signup_data = gcalutil.get_signup_from_event(e, 5)
 
         if signup_data == None: continue
 
@@ -97,7 +96,7 @@ def get_signups_to_notify_hourly(hours_out, hours_from):
     signups = []
     events = gcalutil.get_nhs_events()
     for e in events:
-        signup_data = get_signup_from_event(e, 5)
+        signup_data = gcalutil.get_signup_from_event(e, 5)
 
         if signup_data == None: continue
 
@@ -139,17 +138,4 @@ def send_hourly_notification(hours_out, hours_from=0,include_when=False):
     notif_message = notif_title + "<br><br>" + notif_message
     default_course = cutil.get_notification_course_id()
     cutil.send_announcement(default_course, notif_title, notif_message)
-
-
-
-def get_signup_from_event(cal_event, retries):
-    desc = gcalutil.get_raw_description(cal_event).split(" ")
-    for i in desc:
-        url = sutil.fix_signupgenius_url(i)
-
-        if url == None: continue
-
-        return sutil.get_signup_data(url, retries), url
-    
-    return None
 

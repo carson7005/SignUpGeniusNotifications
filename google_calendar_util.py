@@ -2,6 +2,7 @@ from gcsa.google_calendar import GoogleCalendar
 import json
 from datetime import date, timedelta
 import re
+import signup_util as sutil
 
 
 gc = GoogleCalendar(credentials_path="google_credentials.json")
@@ -33,3 +34,15 @@ def get_nhs_events():
 def get_raw_description(event):
     return re.sub('<[^<]+?>', '', event.description).replace("\xa0", " ")
     
+
+def get_signup_from_event(cal_event, retries):
+    desc = gcalutil.get_raw_description(cal_event).split(" ")
+    for i in desc:
+        url = sutil.fix_signupgenius_url(i)
+
+        if url == None: continue
+
+        return sutil.get_signup_data(url, retries), url
+    
+    return None
+
