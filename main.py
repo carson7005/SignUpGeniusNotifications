@@ -29,4 +29,5 @@ if __name__ == "__main__":
         main()
     except BaseException as e:
         lutil.handle_logger_close()
+        print(e)
 
