@@ -21,7 +21,13 @@ def main():
         schedule.run_pending()
         time.sleep(60)
 
+    lutil.handle_logger_close()
+
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        lutil.handle_logger_close()
+        print(e)
 
