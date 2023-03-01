@@ -29,7 +29,7 @@ def update_current_links(tries):
 
     events = gcalutil.get_all_nhs_events()
     for e in events:
-        signup_link = gcalutil.get_signup_link_from_event(e, tries)
+        signup_link = gcalutil.get_signup_link_from_event(e)
 
         if signup_link == None or signup_link in checked_links: continue
 
