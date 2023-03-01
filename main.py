@@ -19,9 +19,10 @@ def link_update_job():
 def main():
     lutil.log("Starting script...")
 
-    schedule.every().hour.at(":10").do(hourly_job)
-    schedule.every().sunday.at("12:00").do(daily_job)
+    schedule.every().hour.at(":15").do(hourly_job)
+    schedule.every().sunday.at("12:10").do(daily_job)
     schedule.every().day.at("00:00").do(link_update_job)
+    schedule.every().day.at("12:00").do(link_update_job)
 
     while True:
         schedule.run_pending()
