@@ -2,6 +2,7 @@ import notif_util as nutil
 import schedule
 import time
 import log_util as lutil
+import link_util
 
 def hourly_job():
     nutil.send_hourly_notification(2, 1,include_when=True)
@@ -9,13 +10,18 @@ def hourly_job():
 
 def daily_job():
     nutil.send_daily_notification(7)
-    lutil.log("Daily jon done.")
+    lutil.log("Daily job done.")
+
+def link_update_job():
+    link_util.update_current_links(5)
+    lutil.log("Link Update job done.")
 
 def main():
     lutil.log("Starting script...")
 
-    schedule.every().hour.at(":05").do(hourly_job)
+    schedule.every().hour.at(":10").do(hourly_job)
     schedule.every().sunday.at("12:00").do(daily_job)
+    schedule.every().day.at("00:00").do(job_func)
 
     while True:
         schedule.run_pending()
