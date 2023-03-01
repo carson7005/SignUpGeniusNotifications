@@ -51,7 +51,7 @@ def get_raw_description(event):
     return re.sub('<[^<]+?>', '', event.description).replace("\xa0", " ")
 
 
-def get_signup_link_from_event(cal_event, tries):
+def get_signup_link_from_event(cal_event):
     desc = get_raw_description(cal_event).split(" ")
     for i in desc:
         url = sutil.fix_signupgenius_url(i)
@@ -66,5 +66,5 @@ def get_signup_from_event(cal_event, retries):
 
     if url == None: return None
 
-    return sutil.get_signup_data(url, retries), url
+    return sutil.get_signup_data(url, retries)
 

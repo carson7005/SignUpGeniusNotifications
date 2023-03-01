@@ -1,7 +1,9 @@
+import signup_util as sutil
 import canvas_util as cutil
 import google_calendar_util as gcalutil
 from datetime import date, timedelta
 import log_util as lutil
+import link_util
 
 
 def get_notification_message(days_out, days_from, include_when=False):
@@ -75,14 +77,9 @@ def get_notification_message_hourly(hours_out, hours_from, include_when=False):
 
 def get_signups_to_notify(days_out, days_from):
     signups = []
-    events = gcalutil.get_nhs_events()
-    for e in events:
-        signup_data = gcalutil.get_signup_from_event(e, 5)
-
-        if signup_data == None: continue
-
-        signup, url = signup_data[0], signup_data[1]
-
+    links = link_util.get_current_links()
+    for l in links:
+        signup = sutil.get_signup_data(l, 5)
         roles = signup.get_roles_to_notify(days_out, days_from)
 
         if not roles: continue
@@ -94,14 +91,47 @@ def get_signups_to_notify(days_out, days_from):
 
 def get_signups_to_notify_hourly(hours_out, hours_from):
     signups = []
+    links = link_util.get_current_links()
+    for l in links:
+        signup = sutil.get_signup_data(l, 5)
+        roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
+
+        if not roles: continue
+
+        signups.append(signup)
+
+    return signups
+
+
+
+
+def get_signups_to_notify_calendar(days_out, days_from):
+    signups = []
     events = gcalutil.get_nhs_events()
     for e in events:
-        signup_data = gcalutil.get_signup_from_event(e, 5)
+        signup_link = gcalutil.get_signup_link_from_event(e)
 
-        if signup_data == None: continue
+        if signup_link == None: continue
 
-        signup, url = signup_data[0], signup_data[1]
+        signup = sutil.get_signup_data(signup_link, 5)
+        roles = signup.get_roles_to_notify(days_out, days_from)
 
+        if not roles: continue
+
+        signups.append(signup)
+
+    return signups
+
+
+def get_signups_to_notify_hourly_calendar(hours_out, hours_from):
+    signups = []
+    events = gcalutil.get_nhs_events()
+    for e in events:
+        signup_link = gcalutil.get_signup_link_from_event(e)
+
+        if signup_link == None: continue
+
+        signup = sutil.get_signup_data(signup_link, 5)
         roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
 
         if not roles: continue
