@@ -62,7 +62,7 @@ def get_signup_link_from_event(cal_event):
     
 
 def get_signup_from_event(cal_event, retries):
-    url = get_signup_link_from_event(cal_event, retries)
+    url = get_signup_link_from_event(cal_event)
 
     if url == None: return None
 
