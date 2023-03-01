@@ -15,24 +15,24 @@ def get_notification_message(days_out, days_from, include_when=False):
         whole_count = 0
         signup_string = ""
 
-        when_string = f" in the next {days_out} days"
+        when_string = f" in the next {days_out} days{'s'[:days_out^1]}"
         if not include_when:
             when_string = ""
-        elif days_out == 0:
-            when_string = " today"
-        elif days_out == 1:
-            when_string = " tomorrow"
-        
 
         for r in roles:
             signup_string += "\n" + f"   {r.get_notification_role_string()}"
             whole_count += r.get_needed_count()
 
         signup_string += "\n" + f"   Link: <a href={signup.url}>{signup.url}</a>"
+        
+        update_string = ""
+        if whole_count > 0:
+            update_string = f"'{signup.title}' has {whole_count} volunteering" + \
+                f" slot{'s'[:whole_count^1]} available{when_string}:"
+        else:
+            update_string = f"'{signup.title}' is full and happening soon:"
 
-        signup_string = f"'{signup.title}' has {whole_count} volunteering" + \
-                f" slot{'s'[:whole_count^1]} available{when_string}:" + \
-                signup_string
+        signup_string = update_string + signup_string
 
         if notif_message: notif_message += "\n\n"
 
@@ -62,9 +62,15 @@ def get_notification_message_hourly(hours_out, hours_from, include_when=False):
 
         signup_string += "\n" + f"   Link: <a href={signup.url}>{signup.url}</a>"
 
-        signup_string = f"'{signup.title}' has {whole_count} volunteering" + \
-                f" slot{'s'[:whole_count^1]} available{when_string}:" + \
-                signup_string
+        update_string = ""
+        if whole_count > 0:
+            update_string = f"'{signup.title}' has {whole_count} volunteering" + \
+                f" slot{'s'[:whole_count^1]} available{when_string}:"
+        else:
+            update_string = f"'{signup.title}' is full and happening soon:"
+
+
+        signup_string = update_string + signup_string
 
         if notif_message: notif_message += "\n\n"
 

@@ -14,15 +14,13 @@ class SignUp:
 
     def get_roles_to_notify(self, days_out, days_from):
         now = datetime.datetime.now()
-        return [r for r in self.roles if not r.full() and \
-                not r.has_ended() and \
+        return [r for r in self.get_roles_not_ended() if \
                 (r.get_time_object() - now).days <= days_out and \
                 (r.get_time_object() - now).days >= days_from]
 
     def get_roles_to_notify_hourly(self, hours_out, hours_from):
         now = datetime.datetime.now()
-        return [r for r in self.roles if not r.full() and \
-                not r.has_ended() and \
+        return [r for r in self.get_roles_not_ended() if \
                 ((r.get_time_object() - now).total_seconds()) / 3600 <= hours_out and \
                 ((r.get_time_object() - now).total_seconds()) / 3600 >= hours_from]
     
@@ -56,7 +54,13 @@ class SignUpRole:
     def get_notification_role_string(self):
         role_string = ""
         count = self.get_needed_count()
-        role_string += f"{count} slot{'s'[:count^1]} on {self.date}" + \
+        
+        status_string = ""
+        if self.full():
+            status_string = "FULL volunteering slots"
+        else:
+            status_string = f"{count} slot{'s'[:count^1]}"
+        role_string += f"{status_string} on {self.date}" + \
                 f" from {self.start_time} to {self.end_time}"
 
         if self.location != None:
