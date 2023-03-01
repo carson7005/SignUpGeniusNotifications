@@ -49,16 +49,22 @@ def get_all_nhs_events():
 
 def get_raw_description(event):
     return re.sub('<[^<]+?>', '', event.description).replace("\xa0", " ")
-    
 
-def get_signup_from_event(cal_event, retries):
+
+def get_signup_link_from_event(cal_event, tries):
     desc = get_raw_description(cal_event).split(" ")
     for i in desc:
         url = sutil.fix_signupgenius_url(i)
 
-        if url == None: continue
+        if url != None: return url
 
-        return sutil.get_signup_data(url, retries), url
-    
     return None
+    
+
+def get_signup_from_event(cal_event, retries):
+    url = get_signup_link_from_event(cal_event, retries)
+
+    if url == None: return None
+
+    return sutil.get_signup_data(url, retries), url
 

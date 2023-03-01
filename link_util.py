@@ -26,14 +26,11 @@ def update_current_links(tries):
 
     events = gcalutil.get_all_nhs_events()
     for e in events:
-        signup_data = gcalutil.get_signup_from_event(e, tries)
+        signup_link = gcalutil.get_signup_link_from_event(e, tries)
 
-        if signup_data == None: continue
+        if signup_link == None or signup_link in links: continue
 
-        signup, url = signup_data[0], signup_data[1]
-
-        if url in links: continue
-
+        signup = sutil.get_signup_data(signup_link, tries)
         if len(signup.get_roles_not_ended()) > 0:
             links.append(url)
 
