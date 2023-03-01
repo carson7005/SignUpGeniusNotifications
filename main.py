@@ -21,7 +21,7 @@ def main():
 
     schedule.every().hour.at(":10").do(hourly_job)
     schedule.every().sunday.at("12:00").do(daily_job)
-    schedule.every().day.at("00:00").do(job_func)
+    schedule.every().day.at("00:00").do(link_update_job)
 
     while True:
         schedule.run_pending()
