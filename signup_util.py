@@ -12,20 +12,33 @@ class SignUp:
         self.description = description
         self.roles = roles
 
-    def get_roles_to_notify(self, days_out, days_from):
+    def get_roles_to_notify(self, days_out, days_from, include_full=True):
         now = datetime.datetime.now()
-        return [r for r in self.get_roles_not_ended() if \
+
+        roles_array = self.get_roles_not_ended()
+        if not include_full:
+            roles_array = self.get_roles_not_ended_not_full()
+
+        return [r for r in roles_array if \
                 r.get_days_until() <= days_out and \
                 r.get_days_until() >= days_from]
 
-    def get_roles_to_notify_hourly(self, hours_out, hours_from):
+    def get_roles_to_notify_hourly(self, hours_out, hours_from, include_full=True):
         now = datetime.datetime.now()
-        return [r for r in self.get_roles_not_ended() if \
+
+        roles_array = self.get_roles_not_ended()
+        if not include_full:
+            roles_array = self.get_roles_not_ended_not_full()
+
+        return [r for r in roles_array if \
                 r.get_hours_until() <= hours_out and \
                 r.get_hours_until() >= hours_from]
     
     def get_roles_not_ended(self):
         return [r for r in self.roles if not r.has_ended()]
+
+    def get_roles_not_ended_not_full(self):
+        return [r for r in self.roles if not r.has_ended() and not r.full()]
 
 
 
