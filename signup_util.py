@@ -15,20 +15,19 @@ class SignUp:
     def get_roles(self, days_out=None, days_from=0, hours_out=None, hours_from=0, include_full=True, include_ended=True):
         roles = self.roles
 
-        if not roles: return roles
-        
-        if days_out:
-            roles = [r for r in roles if r.get_days_until() <= days_out and \
-                    r.get_days_until() >= days_from]
-        elif hours_out:
-            roles = [r for r in roles if r.get_hours_until() <= hours_out and \
-                    r.get_hours_until() >= hours_from]
+        if roles:
+            if days_out:
+                roles = [r for r in roles if r.get_days_until() <= days_out and \
+                        r.get_days_until() >= days_from]
+            elif hours_out:
+                roles = [r for r in roles if r.get_hours_until() <= hours_out and \
+                        r.get_hours_until() >= hours_from]
 
-        if not include_full:
-            roles = [r for r in roles if not r.full()]
+            if not include_full:
+                roles = [r for r in roles if not r.full()]
 
-        if not include_ended:
-            roles = [r for r in roles if not r.has_ended()]
+            if not include_ended:
+                roles = [r for r in roles if not r.has_ended()]
 
         return roles
 
