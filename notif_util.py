@@ -10,7 +10,7 @@ def get_notification_message(days_out, days_from, include_when=False):
     notif_message = ""
     signups_notify = get_signups_to_notify(days_out, days_from)
     for signup in signups_notify:
-        roles = signup.get_roles_to_notify(days_out, days_from)
+        roles = signup.get_roles(days_out=days_out, days_from=days_from)
 
         whole_count = 0
         signup_string = ""
@@ -47,7 +47,7 @@ def get_notification_message_hourly(hours_out, hours_from, include_when=False):
     notif_message = ""
     signups_notify = get_signups_to_notify_hourly(hours_out, hours_from)
     for signup in signups_notify:
-        roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
+        roles = signup.get_roles(hours_out=hours_out, hours_from=hours_from)
 
         whole_count = 0
         signup_string = ""
@@ -86,7 +86,7 @@ def get_signups_to_notify(days_out, days_from):
     links = link_util.get_current_links()
     for l in links:
         signup = sutil.get_signup_data(l, 5)
-        roles = signup.get_roles_to_notify(days_out, days_from)
+        roles = signup.get_roles(days_out=days_out, days_from=days_from)
 
         if not roles: continue
 
@@ -100,7 +100,7 @@ def get_signups_to_notify_hourly(hours_out, hours_from):
     links = link_util.get_current_links()
     for l in links:
         signup = sutil.get_signup_data(l, 5)
-        roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
+        roles = signup.get_roles(hours_out=hours_out, hours_from=hours_from)
 
         if not roles: continue
 
@@ -120,7 +120,7 @@ def get_signups_to_notify_calendar(days_out, days_from):
         if signup_link == None: continue
 
         signup = sutil.get_signup_data(signup_link, 5)
-        roles = signup.get_roles_to_notify(days_out, days_from)
+        roles = signup.get_roles(days_out=days_out, days_from=days_from)
 
         if not roles: continue
 
@@ -138,7 +138,7 @@ def get_signups_to_notify_hourly_calendar(hours_out, hours_from):
         if signup_link == None: continue
 
         signup = sutil.get_signup_data(signup_link, 5)
-        roles = signup.get_roles_to_notify_hourly(hours_out, hours_from)
+        roles = signup.get_roles(hours_out=hours_out, hours_from=hours_from)
 
         if not roles: continue
 

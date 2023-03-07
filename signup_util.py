@@ -12,34 +12,25 @@ class SignUp:
         self.description = description
         self.roles = roles
 
-    def get_roles_to_notify(self, days_out, days_from, include_full=True):
-        now = datetime.datetime.now()
+    def get_roles(self, days_out=None, days_from=0, hours_out=None, hours_from=0, include_full=True, include_ended=True):
+        roles = self.roles
 
-        roles_array = self.get_roles_not_ended()
+        if not roles: return roles
+        
+        if days_out:
+            roles = [r for r in roles if r.get_days_until() <= days_out and \
+                    r.get_days_until() >= days_from]
+        elif hours_out:
+            roles = [r for r in roles if r.get_hours_until() <= hours_out and \
+                    r.get_hours_until() >= hours_from]
+
         if not include_full:
-            roles_array = self.get_roles_not_ended_not_full()
+            roles = [r for r in roles if not r.full()]
 
-        return [r for r in roles_array if \
-                r.get_days_until() <= days_out and \
-                r.get_days_until() >= days_from]
+        if not include_ended:
+            roles = [r for r in roles if not r.has_ended()]
 
-    def get_roles_to_notify_hourly(self, hours_out, hours_from, include_full=True):
-        now = datetime.datetime.now()
-
-        roles_array = self.get_roles_not_ended()
-        if not include_full:
-            roles_array = self.get_roles_not_ended_not_full()
-
-        return [r for r in roles_array if \
-                r.get_hours_until() <= hours_out and \
-                r.get_hours_until() >= hours_from]
-    
-    def get_roles_not_ended(self):
-        return [r for r in self.roles if not r.has_ended()]
-
-    def get_roles_not_ended_not_full(self):
-        return [r for r in self.roles if not r.has_ended() and not r.full()]
-
+        return roles
 
 
 class SignUpRole:
@@ -85,7 +76,7 @@ class SignUpRole:
         return datetime.datetime.strptime(f"{self.date} {self.end_time}", "%m/%d/%Y %I:%M%p")
 
     def get_hours(self):
-        return (self.get_end_time_object() - self.get_time_object()).hours
+        return (self.get_end_time_object() - self.get_time_object()).total_seconds() / 3600
 
     def has_ended(self):
         return datetime.datetime.now() > self.get_end_time_object()

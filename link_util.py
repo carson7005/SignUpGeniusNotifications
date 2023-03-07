@@ -22,7 +22,7 @@ def update_current_links(tries):
         if fixed_l == None or fixed_l in checked_links: continue
 
         signup = sutil.get_signup_data(l, tries)
-        if len(signup.get_roles_not_ended()) > 0:
+        if len(signup.get_roles(include_ended=False)) > 0:
             links.append(fixed_l)
 
         checked_links.append(fixed_l)
@@ -34,7 +34,7 @@ def update_current_links(tries):
         if signup_link == None or signup_link in checked_links: continue
 
         signup = sutil.get_signup_data(signup_link, tries)
-        if len(signup.get_roles_not_ended()) > 0:
+        if len(signup.get_roles(include_ended=False)) > 0:
             links.append(signup_link)
 
         checked_links.append(signup_link)
