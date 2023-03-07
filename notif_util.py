@@ -6,14 +6,25 @@ import log_util as lutil
 import link_util
 
 
-def get_notification_message(days_out=None, days_from=0, hours_out=None, hours_from=0, include_when=False):
+def get_notification_message(days_out=None,
+                             days_from=0,
+                             hours_out=None,
+                             hours_from=0,
+                             include_when=False):
+
     if not days_out and not hours_out:
         return None
 
     notif_message = ""
-    signups_notify = get_signups_to_notify(days_out=days_out, days_from=days_from, hours_out=hours_out, hours_from=hours_from)
+    signups_notify = get_signups_to_notify(days_out=days_out,
+                                           days_from=days_from,
+                                           hours_out=hours_out,
+                                           hours_from=hours_from)
     for signup in signups_notify:
-        roles = signup.get_roles(days_out=days_out, days_from=days_from, hours_out=hours_out, hours_from=hours_from)
+        roles = signup.get_roles(days_out=days_out,
+                                 days_from=days_from,
+                                 hours_out=hours_out,
+                                 hours_from=hours_from)
 
         whole_count = 0
         signup_string = ""
@@ -58,7 +69,10 @@ def get_signups_to_notify(days_out=None, days_from=0, hours_out=None, hours_from
     links = link_util.get_current_links()
     for l in links:
         signup = sutil.get_signup_data(l, 5)
-        roles = signup.get_roles(days_out=days_out, days_from=days_from, hours_out=hours_out, hours_from=hours_from)
+        roles = signup.get_roles(days_out=days_out,
+                                 days_from=days_from,
+                                 hours_out=hours_out,
+                                 hours_from=hours_from)
 
         if not roles: continue
 
@@ -106,7 +120,9 @@ def get_signups_to_notify_hourly_calendar(hours_out, hours_from):
 
 
 def send_daily_notification(days_out, days_from=0, include_when=False):
-    notif_message, signup_count = get_notification_message(days_out=days_out, days_from=days_from,include_when=include_when)
+    notif_message, signup_count = get_notification_message(days_out=days_out,
+                                                           days_from=days_from,
+                                                           include_when=include_when)
 
     if signup_count == 0:
         lutil.log(f"No signups for daily update ({days_out} days), skipping.")
@@ -120,7 +136,9 @@ def send_daily_notification(days_out, days_from=0, include_when=False):
 
 
 def send_hourly_notification(hours_out, hours_from=0,include_when=False):
-    notif_message, signup_count = get_notification_message_hourly(hours_out=hours_out, hours_from=hours_from,include_when=include_when)
+    notif_message, signup_count = get_notification_message_hourly(hours_out=hours_out,
+                                                                  hours_from=hours_from,
+                                                                  include_when=include_when)
 
     if signup_count == 0:
         lutil.log(f"No signups for hourly update ({hours_out} hours), skipping.")
