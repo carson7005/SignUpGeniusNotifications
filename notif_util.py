@@ -118,7 +118,7 @@ def send_weekly_notification(days_out=7, days_from=0, include_when=False):
 
 
 def send_hourly_notification(hours_out, hours_from=0,include_when=False):
-    notif_message, signup_count = get_notification_message_hourly(hours_out=hours_out,
+    notif_message, signup_count = get_notification_message(hours_out=hours_out,
                                                                   hours_from=hours_from,
                                                                   include_when=include_when)
 
