@@ -139,6 +139,7 @@ def get_page_data(url, retries, browser_instance=None):
     data = pd.read_html(tables.prettify(), displayed_only=False)
 
     table = data[0]
+    print(table.columns)
     
     slot_label = "Available Slot"
     if slot_label not in table.columns:
