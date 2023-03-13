@@ -3,6 +3,7 @@ import schedule
 import time
 import log_util as lutil
 import link_util
+import traceback
 
 def hourly_job():
     nutil.send_hourly_notification(2, 1,include_when=True)
@@ -40,5 +41,5 @@ if __name__ == "__main__":
         main()
     except BaseException as e:
         lutil.handle_logger_close()
-        print(e)
+        traceback.print_exc()
 
