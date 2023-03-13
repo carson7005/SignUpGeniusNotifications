@@ -159,7 +159,8 @@ def get_page_data(url, retries, browser_instance=None):
             "table": table,
             "title": s_title.text,
             "author": s_author.text,
-            "description": description
+            "description": description,
+            "slot_label": slot_label
         }
 
 
@@ -222,10 +223,7 @@ def get_signup_data(url: str, retries, browser_instance=None):
             start_time = data["whole_start_time"]
             end_time = data["whole_end_time"]
 
-        slot_label = "Available Slot"
-        if slot_label not in row:
-            slot_label = "Volunteer"
-
+        slot_label = data["slot_label"]
         slot_array = str(row[slot_label]).split("  ")
         if len(slot_array) <= 1: continue
                 
