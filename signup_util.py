@@ -141,9 +141,11 @@ def get_page_data(url, retries, browser_instance=None):
     table = data[0]
     print(table.columns)
     
-    slot_label = "Available Slot"
-    if slot_label not in table.columns:
-        slot_label = "Volunteer"
+    slot_label_i = len(table.columns) - 1
+    slot_label = table.columns[slot_label_i]
+    while "Unnamed" in slot_label:
+        slot_label_i -= 1
+        slot_label = table.columns[slot_label_i]
     for i in range(len(table[slot_label])):
         s = table[slot_label][i]
         if(str(s) == "nan"): table = table.drop(i)
