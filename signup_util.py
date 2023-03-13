@@ -146,6 +146,8 @@ def get_page_data(url, retries, browser_instance=None):
     while "Unnamed" in slot_label:
         slot_label_i -= 1
         slot_label = table.columns[slot_label_i]
+
+    print(f"Slot Label: {slot_label}")
     for i in range(len(table[slot_label])):
         s = table[slot_label][i]
         if(str(s) == "nan"): table = table.drop(i)
