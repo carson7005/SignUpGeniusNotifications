@@ -84,7 +84,7 @@ class SignUpRole:
         return ((self.get_time_object() - datetime.datetime.now()).total_seconds()) / 3600
 
     def get_days_until(self):
-        return get_hours_until(self) / 24
+        return self.get_hours_until() / 24
 
 
 

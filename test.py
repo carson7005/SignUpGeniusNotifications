@@ -5,7 +5,7 @@ import time
 def main():
     start = time.time()
     # nutil.send_hourly_notification(2, 1, include_when=True)
-    nutil.send_daily_notification(7)
+    nutil.send_weekly_notification()
 
     uptime = time.time() - start
     print(f"Uptime: {uptime}")
