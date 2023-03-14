@@ -1,5 +1,5 @@
-import google_calendar_util as gcalutil
-import signup_util as sutil
+from util import google_calendar_util as gcalutil, \
+    signup_util as sutil
 import os
 import json
 

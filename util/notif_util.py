@@ -1,9 +1,9 @@
-import signup_util as sutil
-import canvas_util as cutil
-import google_calendar_util as gcalutil
+from util import signup_util as sutil, \
+    canvas_util as cutil, \
+    google_calendar_util as gcalutil, \
+    log_util as lutil, \
+    link_util
 from datetime import date, timedelta
-import log_util as lutil
-import link_util
 
 
 def get_notification_message(days_out=None,

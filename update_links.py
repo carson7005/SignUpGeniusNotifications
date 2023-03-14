@@ -1,4 +1,4 @@
-import link_util
+from util import link_util
 
 
 def main():

@@ -1,4 +1,4 @@
-import notif_util as nutil
+from util import notif_util as nutil
 import time
 
 

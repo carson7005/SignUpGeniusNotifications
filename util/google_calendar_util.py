@@ -2,7 +2,7 @@ from gcsa.google_calendar import GoogleCalendar
 import json
 from datetime import date, timedelta
 import re
-import signup_util as sutil
+from util import signup_util as sutil
 
 
 gc = GoogleCalendar(credentials_path="google_credentials.json")

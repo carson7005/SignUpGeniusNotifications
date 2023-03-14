@@ -1,8 +1,8 @@
-import notif_util as nutil
+from util import notif_util as nutil, \
+    log_util as lutil, \
+    link_util
 import schedule
 import time
-import log_util as lutil
-import link_util
 import traceback
 
 def hourly_job():

@@ -1,7 +1,7 @@
+from util import page_util as putil, \
+    log_util as lutil
 import pandas as pd
 import datetime
-import page_util as putil
-import log_util as lutil
 
 
 class SignUp:

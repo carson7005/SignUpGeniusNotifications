@@ -1,12 +1,13 @@
+from util import signup_util as sutil, \
+    log_util as lutil
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from playwright._impl._api_types import TimeoutError
-import signup_util as sutil
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 import time
-import log_util as lutil
+
 
 class DynamicLoadError(Exception):
     def __init__(self, url, message):
