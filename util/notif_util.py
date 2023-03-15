@@ -66,7 +66,8 @@ def send_notification(days_out=None,
                       hours_out=None,
                       hours_from=0,
                       include_full=True,
-                      include_when=False):
+                      include_when=False,
+                      override_title=None):
     if not days_out and not hours_out:
         lutil.log("No ending time given, skipping notification.")
         return
@@ -88,7 +89,8 @@ def send_notification(days_out=None,
         return
 
     current_date_str = date.today().strftime("%m/%d/%Y")
-    notif_title = f"{notif_status[0]} Update for SignUps ({current_date_str})"
+    notif_title = f"{override_title if override_title else notif_status[0]}" + \
+            f" Update for SignUps ({current_date_str})"
     notif_message = notif_title + "<br>" + notif_message
     default_course = cutil.get_notification_course_id()
     cutil.send_announcement(default_course, notif_title, notif_message)
@@ -98,6 +100,6 @@ def send_notification(days_out=None,
 
 
 def send_weekly_notification():
-    send_notification(days_out=7)
+    send_notification(days_out=7, override_title="Weekly")
 
 
