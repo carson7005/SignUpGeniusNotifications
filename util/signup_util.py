@@ -50,6 +50,7 @@ class SignUp:
                                include_full=include_full)
 
         full_roles_seperated = [r for r in roles if r.full()]
+        roles = [r for r in roles if not r.full()]
 
         if roles or full_roles_seperated:
             message += "\n"
