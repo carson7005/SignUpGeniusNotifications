@@ -10,7 +10,7 @@ def hourly_job():
     lutil.log("Hourly job done.")
 
 def daily_job():
-    nutil.send_notification(days_out=1)
+    nutil.send_notification(days_out=1, include_full=False, include_when=True)
     lutil.log("Daily job done.")
 
 def weekly_job():
