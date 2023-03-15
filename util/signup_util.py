@@ -60,9 +60,9 @@ class SignUp:
         when_string = ""
         if include_time_detail:
             if days_out:
-                when_string = f" in the next {days_out if days_out > 0 else ''} day{'s'[:days_out^1]}"
+                when_string = f" in the next {days_out if days_out > 1 else ''} day{'s'[:days_out^1]}"
             elif hours_out:
-                when_string = f" in the next {hours_out if hours_out > 0 else ''} hour{'s'[:hours_out^1]}"
+                when_string = f" in the next {hours_out if hours_out > 1 else ''} hour{'s'[:hours_out^1]}"
 
         if roles:
             whole_needed = 0
