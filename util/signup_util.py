@@ -87,12 +87,12 @@ class SignUp:
             full_update_str = "\n".join(full_update)
             full_update_str = f"<blockquote>{full_update_str}</blockquote>"
 
-            full_title = f"'{self.title} has {len(full_roles_seperated)}" + \
-                    f" full volunteering roles{when_string}:"
+            full_title = f"'{self.title}' has {len(full_roles_seperated)}" + \
+                    f" full volunteering role{'s'[:len(full_roles_seperated)^1]}{when_string}:"
 
             message += "\n" + full_title + full_update_str
         
-        message += "\n" + f"Link: <a href={self.url}>{self.url}</a>" 
+        message += "\n" + f"Link: <a href={self.url}>{self.url}</a>" + "\n" 
         return message
         
 
