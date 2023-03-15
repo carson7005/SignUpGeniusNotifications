@@ -47,18 +47,14 @@ class SignUp:
                                days_from=days_from,
                                hours_out=hours_out,
                                hours_from=hours_from,
-                               include_full=False)
+                               include_full=include_full)
 
-        full_roles_seperated = [] if not include_full else \
-                self.get_roles(days_out=days_out,
-                               days_from=days_from,
-                               hours_out=hours_out,
-                               hours_from=hours_from,
-                               include_full=True)
+        full_roles_seperated = [r for r in roles if r.full()]
 
         if roles or full_roles_seperated:
             message += "\n"
         else:
+            print("NOT")
             return message
         
         when_string = ""
