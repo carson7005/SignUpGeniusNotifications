@@ -71,7 +71,9 @@ class SignUp:
                 not_full_update.append("- " + r.get_notification_role_string())
                 whole_needed += r.get_needed_count()
             
-            not_full_update_str = f"<blockquote>{not_full_update.join('\n')}</blockquote>"
+            not_full_update_str = not_full_update.join("\n")
+            not_full_update_str = f"<blockquote>{not_full_update_str}</blockquote>"
+
             not_full_title = f"'{self.title}' has {whole_needed} slot{'s'[:whole_needed^1]}" + \
                     f" available{when_string}:"
             
@@ -81,8 +83,10 @@ class SignUp:
             full_update = []
             for r in full_roles_seperated:
                 full_update.append("- " + r.get_notification_role_string())
+                
+            full_update_str = full_update.join("\n")
+            full_update_str = f"<blockquote>{full_update_str}</blockquote>"
 
-            full_update_str = f"<blockquote>{full_update.join('\n')}</blockquote>"
             full_title = f"'{self.title} has {len(full_roles_seperated)}" + \
                     f" full volunteering roles{when_string}:"
 
