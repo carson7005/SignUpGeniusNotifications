@@ -23,7 +23,12 @@ def get_notification_message(days_out=None,
                                            hours_from=hours_from,
                                            include_full=include_full)
     for signup in signups_notify:
-        notif_message += signup.get_signup_message()
+        notif_message += signup.get_signup_message(days_out=days_out,
+                                                   days_from=days_from,
+                                                   hours_out=hours_out,
+                                                   hours_from=hours_from,
+                                                   include_full=include_full,
+                                                   include_time_detail=include_when)
 
     notif_message = notif_message.replace("\n", "<br>")
 
