@@ -72,7 +72,7 @@ def send_daily_notification(days_out, days_from=0, include_when=False):
 
     current_date_str = date.today().strftime("%m/%d/%Y")
     notif_title = f"Daily Update for SignUps ({current_date_str})"
-    notif_message = notif_title + "<br><br>" + notif_message
+    notif_message = notif_title + "<br>" + notif_message
     default_course = cutil.get_notification_course_id()
     cutil.send_announcement(default_course, notif_title, notif_message)
 
@@ -88,7 +88,7 @@ def send_weekly_notification(days_out=7, days_from=0, include_when=False):
 
     current_date_str = date.today().strftime("%m/%d/%Y")
     notif_title = f"Weekly Update for SignUps ({current_date_str})"
-    notif_message = notif_title + "<br><br>" + notif_message
+    notif_message = notif_title + "<br>" + notif_message
     default_course = cutil.get_notification_course_id()
     cutil.send_announcement(default_course, notif_title, notif_message)
 
@@ -104,7 +104,7 @@ def send_hourly_notification(hours_out, hours_from=0,include_when=False):
 
     current_date_str = date.today().strftime("%m/%d/%Y")
     notif_title = f"Hourly Update for SignUps ({current_date_str})"
-    notif_message = notif_title + "<br><br>" + notif_message
+    notif_message = notif_title + "<br>" + notif_message
     default_course = cutil.get_notification_course_id()
     cutil.send_announcement(default_course, notif_title, notif_message)
 

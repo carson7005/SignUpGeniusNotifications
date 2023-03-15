@@ -55,7 +55,6 @@ class SignUp:
         if roles or full_roles_seperated:
             message += "\n"
         else:
-            print("NOT")
             return message
         
         when_string = ""
@@ -69,7 +68,7 @@ class SignUp:
             whole_needed = 0
             not_full_update = ""
             for r in roles:
-                not_full_update += "\n" + r.get_notification_role_string()
+                not_full_update += "\n   - " + r.get_notification_role_string()
                 whole_needed += r.get_needed_count()
 
             not_full_title = f"'{self.title}' has {whole_needed} slot{'s'[:whole_needed^1]}" + \
@@ -80,13 +79,14 @@ class SignUp:
         if full_roles_seperated:
             full_update = ""
             for r in full_roles_seperated:
-                full_update += "\n" + r.get_notification_role_string()
+                full_update += "\n   - " + r.get_notification_role_string()
 
             full_title = f"'{self.title} has {len(full_roles_seperated)}" + \
                     f" full volunteering roles{when_string}:"
 
             message += "\n" + full_title + full_update
-
+        
+        message += "\n" + f"Link: <a href={self.url}>url</a>" 
         return message
         
 
