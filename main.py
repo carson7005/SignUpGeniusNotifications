@@ -6,7 +6,7 @@ import time
 import traceback
 
 def hourly_job():
-    nutil.send_notification(hours_out=2, hours_from=1,include_when=True)
+    nutil.send_notification(hours_out=2, hours_from=1, include_full=False, include_when=True)
     lutil.log("Hourly job done.")
 
 def daily_job():
