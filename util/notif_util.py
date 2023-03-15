@@ -30,6 +30,11 @@ def get_notification_message(days_out=None,
                                                    include_full=include_full,
                                                    include_time_detail=include_when)
 
+    contact_email = "joshua.fernandez@dexterschools.org"
+    notif_message += "\n<hr>\n" + "Is there anything incorrect with this " + \
+        "notification? If so, please contact Josh Fernandez (" + \
+        f"<a href='mailto:{contact_email}'>{contact_email}</a>)" + "\n"
+    
     notif_message = notif_message.replace("\n", "<br>")
 
     return notif_message, len(signups_notify)
