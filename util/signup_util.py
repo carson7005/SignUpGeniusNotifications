@@ -31,6 +31,65 @@ class SignUp:
 
         return roles
 
+    def get_signup_message(self,
+                           days_out=None,
+                           days_from=0,
+                           hours_out=None,
+                           hours_from=0,
+                           include_full=True,
+                           include_time_detail=False):
+        if not days_out and not hours_out:
+            return None
+        
+        message = ""
+
+        roles = self.get_roles(days_out=days_out,
+                               days_from=days_from,
+                               hours_out=hours_out,
+                               hours_from=hours_from,
+                               include_full=include_full)
+
+        full_roles_seperated = []
+
+        for role in full_roles_seperated:
+            if role.full():
+                roles.remove(role)
+                full_roles_seperated.append(role)
+        
+        if roles or full_roles_seperated:
+            message += "\n"
+        
+        when_string = ""
+        if include_time_detail:
+            if days_out:
+                when_string = f" in the next {days_out} days{'s'[:days_out^1]}"
+            elif hours_out:
+                when_string = f" in the next {hours_out} hour{'s'[:hours_out^1]}"
+
+        if roles:
+            whole_needed = 0
+            not_full_update = ""
+            for r in roles:
+                not_full_update += "\n" + r.get_notification_role_string()
+                whole_needed += r.get_needed_count()
+
+            not_full_title = f"'{self.title}' has {whole_needed} slot{'s'[:whole_needed^1]}" + \
+                    f" available{when_string}:"
+            
+            message += "\n" + not_full_title + not_full_update
+
+        if full_roles_seperated:
+            full_update = ""
+            for r in full_roles_seperated:
+                full_update += "\n" + r.get_notification_role_string()
+
+            full_title = f"'{self.title} has {len(full_roles_seperated)}" + \
+                    f" full volunteering roles{when_string}:"
+
+            message += "\n" + full_title + full_update
+
+        return message
+        
 
 class SignUpRole:
     def __init__(self, title, current, needed, location, date, start_time, end_time):
@@ -58,7 +117,9 @@ class SignUpRole:
         role_string = ""
         count = self.get_needed_count()
         
-        status_string = f"{count if count > 0 else 'No'} slot{'s'[:count^1]} available"
+        status_string = f"{count} slot{'s'[:count^1]} available"
+        if count == 0:
+            status_string = f"Full slots"
 
         role_string += f"{status_string} on {self.date}" + \
                 f" from {self.start_time} to {self.end_time}"
