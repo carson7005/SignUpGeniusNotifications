@@ -51,7 +51,7 @@ class SignUp:
 
         full_roles_seperated = []
 
-        for role in full_roles_seperated:
+        for role in roles:
             if role.full():
                 roles.remove(role)
                 full_roles_seperated.append(role)
