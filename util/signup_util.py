@@ -47,17 +47,19 @@ class SignUp:
                                days_from=days_from,
                                hours_out=hours_out,
                                hours_from=hours_from,
-                               include_full=include_full)
+                               include_full=False)
 
-        full_roles_seperated = []
+        full_roles_seperated = [] if not include_full else \
+                self.get_roles(days_out=days_out,
+                               days_from=days_from,
+                               hours_out=hours_out,
+                               hours_from=hours_from,
+                               include_full=True)
 
-        for role in roles:
-            if role.full():
-                roles.remove(role)
-                full_roles_seperated.append(role)
-        
         if roles or full_roles_seperated:
             message += "\n"
+        else:
+            return message
         
         when_string = ""
         if include_time_detail:
