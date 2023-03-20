@@ -292,6 +292,8 @@ def get_signup_data(url: str, retries, browser_instance=None):
         slot_label = data["slot_label"]
         slot_array = str(row[slot_label]).split("  ")
         if len(slot_array) <= 1: continue
+
+        print(slot_array)
                 
         title = slot_array[1]
         title_check = title.split(" ")[0]
