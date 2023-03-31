@@ -12,6 +12,20 @@ class SignUp:
         self.description = description
         self.roles = roles
 
+
+    def to_json(self):
+        roles_json_array = []
+        for r in self.roles:
+            roles_json_array.append(r.to_json())
+
+        return {
+                "url": self.url,
+                "title": self.title,
+                "author": self.author,
+                "description": self.description,
+                "roles": roles_json_array
+            }
+
     def get_roles(self, days_out=None, days_from=0, hours_out=None, hours_from=0, include_full=True, include_ended=True):
         roles = self.roles
 
@@ -105,6 +119,17 @@ class SignUpRole:
         self.date = date
         self.start_time = start_time
         self.end_time = end_time
+
+    def to_json(self):
+        return {
+                "title": self.title,
+                "current_count": self.current,
+                "needed_count": self.needed,
+                "location_string": self.location,
+                "date_string": self.date,
+                "start_time_string": self.start_time,
+                "end_time_string": end_time
+            }
     
     def full(self): return self.current == self.needed
 
