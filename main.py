@@ -1,6 +1,5 @@
 from util import notif_util as nutil, \
-    log_util as lutil, \
-    link_util
+    log_util as lutil
 import schedule
 import time
 import traceback
@@ -17,9 +16,6 @@ def weekly_job():
     nutil.send_weekly_notification()
     lutil.log("Weekly job done.")
 
-def link_update_job():
-    link_util.update_current_links(5)
-    lutil.log("Link Update job done.")
 
 def main():
     lutil.log("Starting script...")
@@ -35,8 +31,6 @@ def main():
     schedule.every().saturday.at(daily_time).do(daily_job)
 
     schedule.every().monday.at(daily_time).do(weekly_job)
-
-    schedule.every().day.at("00:00").do(link_update_job)
 
     while True:
         schedule.run_pending()
