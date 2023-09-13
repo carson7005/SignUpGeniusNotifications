@@ -1,16 +1,44 @@
-from util import page_util as putil, \
-    log_util as lutil
-import pandas as pd
+from util import log_util as lutil
 import datetime
+import requests as r
 
 
 class SignUp:
-    def __init__(self, url, title, author, description, roles):
+    def __init__(self, url, id, title, author, general_start_time, general_end_time):
         self.url = url
+        self.id = id
         self.title = title
         self.author = author
-        self.description = description
+
+        self.general_start_time = general_start_time
+        self.general_end_time = general_end_time
+
+        self.roles = []
+        
+
+    def to_json(self):
+        roles_json_array = []
+        for r in self.roles:
+            roles_json_array.append(r.to_json())
+
+        return {
+                "url": self.url,
+                "id": self.id,
+                "title": self.title,
+                "author": self.author,
+                "roles": roles_json_array
+            }
+
+    def set_roles(self, roles):
+        for role in roles:
+            if role.start_time == 0:
+                role.start_time = self.general_start_time
+
+            if role.end_time == 0:
+                role.end_time = self.general_end_time
+                
         self.roles = roles
+
 
     def get_roles(self, days_out=None, days_from=0, hours_out=None, hours_from=0, include_full=True, include_ended=True):
         roles = self.roles
@@ -69,7 +97,7 @@ class SignUp:
             not_full_update = []
             for r in roles:
                 not_full_update.append("- " + r.get_notification_role_string())
-                whole_needed += r.get_needed_count()
+                whole_needed += r.needed
             
             not_full_update_str = "\n".join(not_full_update)
             not_full_update_str = f"<blockquote>{not_full_update_str}</blockquote>"
@@ -97,48 +125,49 @@ class SignUp:
         
 
 class SignUpRole:
-    def __init__(self, title, current, needed, location, date, start_time, end_time):
+    def __init__(self, title, needed, start_time, end_time):
         self.title = title
-        self.current = current
         self.needed = needed
-        self.location = location
-        self.date = date
         self.start_time = start_time
         self.end_time = end_time
+
+    def to_json(self):
+        return {
+                "title": self.title,
+                "needed_count": self.needed,
+                "start_time_string": self.start_time,
+                "end_time_string": self.end_time
+            }
     
-    def full(self): return self.current == self.needed
+    def full(self): return self.needed == 0
 
     def get_testing_role_string(self):
         return f"Title: {self.title}" + "\n" + \
-            f"   Status: {self.current}/{self.needed}" + "\n" + \
-            f"   Location: {self.location}" + "\n" + \
-            f"   Date: {self.date}" + "\n" + \
+            f"   Status: {self.needed}" + "\n" + \
             f"   Time: {self.start_time} - {self.end_time}"
-
-    def get_needed_count(self):
-        return self.needed - self.current
-
-    def get_notification_role_string(self):
-        role_string = ""
-        count = self.get_needed_count()
-        
-        status_string = f"{count} slot{'s'[:count^1]} available"
-        if count == 0:
+   
+    def get_notification_role_string(self):      
+        status_string = f"{self.needed} slot{'s'[:self.needed^1]} available"
+        if self.full():
             status_string = f"Full slots"
 
-        role_string += f"{status_string} on {self.date}" + \
-                f" from {self.start_time} to {self.end_time}"
+        notification_string = f"{status_string}"
 
-        if self.location != None:
-            role_string += f" at {self.location}"
-
-        return role_string
+        if self.start_time != 0:
+            notification_string += f" on {self.get_time_object().strftime('%m/%d/%Y')}"
+            if self.end_time != 0:
+                start_time_string = self.get_time_object().strftime("%-I:%M %p")
+                end_time_string = self.get_end_time_object().strftime("%-I:%M %p")
+                notification_string += f" from {start_time_string} to {end_time_string}"
+                        
+        return notification_string
+    
 
     def get_time_object(self):
-        return datetime.datetime.strptime(f"{self.date} {self.start_time}", "%m/%d/%Y %I:%M%p")
+        return datetime.datetime.fromtimestamp(self.start_time)
 
     def get_end_time_object(self):
-        return datetime.datetime.strptime(f"{self.date} {self.end_time}", "%m/%d/%Y %I:%M%p")
+        return datetime.datetime.fromtimestamp(self.end_time)
 
     def get_hours(self):
         return (self.get_end_time_object() - self.get_time_object()).total_seconds() / 3600
@@ -153,15 +182,7 @@ class SignUpRole:
         return self.get_hours_until() / 24
 
 
-
-WHOLE_TITLE = ("h1", {"class": "signup--title-text ng-binding"})
-WHOLE_AUTHOR = ("div", {"class": "pull-left signup--creator-name ng-binding"})
-WHOLE_DESCRIPTION = ("p", {"class": "ng-binding", "data-ng-bind-html": "signupInfo.header.description"})
-
-SIGNUP_TABLE_CONTAINER = ("div", {"class": "row data-grid ng-scope"})
-
-SIGNUP_EXTRA_DETAILS = ("div", {"class": "row hdr-spacer ng-scope"})
-
+BASE_SIGNUP_GENIUS_URL = "https://api.signupgenius.com/v2/k"
 
 def fix_signupgenius_url(url):
     if "signupgenius.com" not in url:
@@ -172,149 +193,63 @@ def fix_signupgenius_url(url):
     return new_url
 
 
-
-def get_signup_table(soup):
-    table_container = soup.find(SIGNUP_TABLE_CONTAINER[0], SIGNUP_TABLE_CONTAINER[1])
-    if table_container == None:
-        return None
-
-    return table_container.find("table")
-
-
-def get_page_data(url, retries, browser_instance=None):
-    lutil.log(f"Getting Data for {url}")
-    soup = putil.get_selenium_soup(url, retries, browser_instance)
-
-    s_title = soup.find(WHOLE_TITLE[0], attrs=WHOLE_TITLE[1])
-    s_author = soup.find(WHOLE_AUTHOR[0], attrs=WHOLE_AUTHOR[1])
-
-    description = None
-    s_description_temp = soup.find(WHOLE_DESCRIPTION[0], attrs=WHOLE_DESCRIPTION[1])
-    if s_description_temp != None:
-        s_descriptions = s_description_temp.findAll("p")
-        
-        descriptions = []
-        if len(s_descriptions) > 0:
-            for d in s_descriptions:
-                descriptions.append(d.text)
-
-            description = "\n\n".join(descriptions)
-
-    tables = get_signup_table(soup)
-    if tables == None: raise DynamicLoadError(url, f"Table for signup at '{url}' is null")
-    data = pd.read_html(tables.prettify(), displayed_only=False)
-
-    table = data[0]
-    print(table.columns)
+def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
+    signups = []
     
-    slot_label_i = len(table.columns) - 1
-    slot_label = table.columns[slot_label_i]
-    while "Unnamed" in slot_label:
-        slot_label_i -= 1
-        slot_label = table.columns[slot_label_i]
+    signups_request = r.get(
+        f"{BASE_SIGNUP_GENIUS_URL}/signups/created/active/",
+        {"user_key": signup_genius_token}
+    )
 
-    print(f"Slot Label: {slot_label}")
-    for i in range(len(table[slot_label])):
-        s = table[slot_label][i]
-        if(str(s) == "nan"): table = table.drop(i)
+    if signups_request.ok:
+        signups_array = signups_request.json()["data"]
+        for signup_json in signups_array:
+            signup = SignUp(
+                signup_json["signupurl"],
+                signup_json["signupid"],
+                signup_json["title"],
+                signup_json["contactname"],
+                signup_json["starttime"],
+                signup_json["endtime"]
+            )
 
-    table = table.reset_index()
-    table = table.drop(columns=["index"])
+            signups.append(signup)
 
-    page_data_object = {
-            "table": table,
-            "title": s_title.text,
-            "author": s_author.text,
-            "description": description,
-            "slot_label": slot_label
-        }
+            lutil.log(f"Fetched signup '{signup.title}' with the ID '{signup.id}'")
+    else:
+        lutil.log(f"Unable to execute signup request. Status Code: {signups_request.status_code}")
 
+    if with_roles:
+        for signup in signups:
+            signup.set_roles(get_signup_roles_available(signup_genius_token, signup.id))
 
-    extra_data = list(soup.findAll(SIGNUP_EXTRA_DETAILS[0], SIGNUP_EXTRA_DETAILS[1]))
-    DETAIL_TITLE_ATT = ("strong", {"class": "ng-binding"})
-    extra_data = [d for d in extra_data if d.find(DETAIL_TITLE_ATT[0], DETAIL_TITLE_ATT[1]).text != "Share"]
-    if len(extra_data) > 0:
-        for d in extra_data:
-            detail_title = d.find(DETAIL_TITLE_ATT[0], DETAIL_TITLE_ATT[1]).text
-            DETAIL_TEXT_ATT = ("div", {"class": "pull-left ng-binding"})
-            match detail_title:
-                case "Date":
-                    detail_text = d.find(DETAIL_TEXT_ATT[0], DETAIL_TEXT_ATT[1]).text
-                    page_data_object["whole_date"] = detail_text.split(" ")[0]
-                case "Time":
-                    detail_text = d.find(DETAIL_TEXT_ATT[0], DETAIL_TEXT_ATT[1]).text
-                    time_array = detail_text.split(" ")
-                    page_data_object["whole_start_time"] = time_array[0]
-                    page_data_object["whole_end_time"] = time_array[2]
-                case "Location":
-                    detail_text = d.find("span", {"class": "ng-binding"}).text
-                    page_data_object["whole_location"] = detail_text
-
-    return page_data_object
+            lutil.log(f"Set roles for signup '{signup.title}'")
 
 
-def get_signup_data(url: str, retries, browser_instance=None):
-    data = get_page_data(url, retries, browser_instance)
+    return signups
 
-    table = data["table"]
-    print(table)
-
+        
+def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     roles = []
+    
+    params = {
+        "user_key": signup_genius_token
+    }
+    roles_request = r.get(
+        f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params)
 
-    for i in range(len(table.index)):
-        row = table.loc[i]
-
-        
-        date = None
-        if "Date" in row:
-            date = str(row["Date"]).split("  ")[0]
-        elif "whole_date" in data:
-            date = data["whole_date"]
-        
-        location = None
-        if "Location" in row:
-            location = str(row["Location"]).split("  ")[0]
-            if str(location) == "nan":
-                location = None
-        elif "whole_location" in data:
-            location = data["whole_location"]
-        
-        start_time = None
-        end_time = None
-        if "Time" in row:
-            full_time = str(row["Time"]).split("  ")
-            start_time = full_time[0].replace("-", "")
-            end_time = full_time[1]
-        elif "whole_start_time" in data and "whole_end_time" in data:
-            start_time = data["whole_start_time"]
-            end_time = data["whole_end_time"]
-
-        slot_label = data["slot_label"]
-        slot_array = str(row[slot_label]).split("  ")
-        if len(slot_array) <= 1: continue
-                
-        title = slot_array[1]
-        title_check = title.split(" ")[0]
-        title_correction = 0
-        if title_check == "Full" or title_check == "All" or \
-                title_check.isnumeric():
-                    title_correction = 1
-                    title = None
-        
-        current = 0
-        needed = 0
-        status = slot_array[2 - title_correction].split(" ")
-        if status[0] == "All":
-            current = int(status[1])
-            needed = current
-        elif status[1] == "slots":
-            needed = int(status[0])
-        else:
-            current = int(status[0])
-            needed = int(status[2])
-
-        roles.append(SignUpRole(title, current, needed, location, date, start_time, end_time))
-
-
-    return SignUp(url, data["title"], data["author"], data["description"], roles)
+    if roles_request.ok:
+        roles_array = roles_request.json()["data"]["signup"]
+        for role_json in roles_array:
+            roles.append(SignUpRole(
+                role_json["item"],
+                role_json["myqty"], # Gives the amount of people NEEDED
+                role_json["startdate"], # All the times below can be '0' (same as None)
+                role_json["enddate"]
+            ))
+    else:
+        lutil.log(f"Unable to execute roles request for signup '{signup_id}'. \
+                    Status Code: '{roles_request.status_code}'")
+    
+    return roles
 
