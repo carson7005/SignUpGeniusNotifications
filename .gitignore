@@ -195,11 +195,6 @@ tags
 
 # Custom
 test/
-canvas_token.json
-google_credentials.json
-token.pickle
-calendar_data.json
-credentials/
 logs/
-links.json
+config.json
 
