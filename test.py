@@ -9,7 +9,11 @@ def main():
     config_file.close()
 
     
-    nutil.send_weekly_notification(token)
+    nutil.send_notification(token,
+                            days_out=1,
+                            include_full=False,
+                            include_when=True)
+    # nutil.send_weekly_notification(token)
 
 if __name__ == "__main__":
     main()

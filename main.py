@@ -26,13 +26,11 @@ def weekly_job():
 
 
 def main():
-    
-    
     lutil.log("Starting script...")
 
-    schedule.every().hour.at(":15").do(hourly_job)
+    schedule.every().hour.at(get_config_item("hourly_minute")).do(hourly_job)
 
-    daily_time = "07:00"
+    daily_time = get_config_item("daily_time")
     schedule.every().sunday.at(daily_time).do(daily_job)
     schedule.every().tuesday.at(daily_time).do(daily_job)
     schedule.every().wednesday.at(daily_time).do(daily_job)
