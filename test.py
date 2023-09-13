@@ -1,15 +1,15 @@
 from util import notif_util as nutil
-import time
+import json
 
 
 def main():
-    start = time.time()
-    # nutil.send_weekly_notification()
-    nutil.send_notification(days_out=1, include_full=True, include_when=True)
+    config_file = open("config.json")
+    data = json.load(config_file)
+    token = data["signup_genius_token"]
+    config_file.close()
 
-    uptime = time.time() - start
-    print(f"Uptime: {uptime}")
-
+    
+    nutil.send_weekly_notification(token)
 
 if __name__ == "__main__":
     main()

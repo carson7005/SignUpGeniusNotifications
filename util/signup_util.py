@@ -4,11 +4,14 @@ import requests as r
 
 
 class SignUp:
-    def __init__(self, url, id, title, author):
+    def __init__(self, url, id, title, author, general_start_time, general_end_time):
         self.url = url
         self.id = id
         self.title = title
         self.author = author
+
+        self.general_start_time = general_start_time
+        self.general_end_time = general_end_time
 
         self.roles = []
         
@@ -27,6 +30,13 @@ class SignUp:
             }
 
     def set_roles(self, roles):
+        for role in roles:
+            if role.start_time == 0:
+                role.start_time = self.general_start_time
+
+            if role.end_time == 0:
+                role.end_time = self.general_end_time
+                
         self.roles = roles
 
 
@@ -115,10 +125,9 @@ class SignUp:
         
 
 class SignUpRole:
-    def __init__(self, title, needed, date, start_time, end_time):
+    def __init__(self, title, needed, start_time, end_time):
         self.title = title
         self.needed = needed
-        self.date = date
         self.start_time = start_time
         self.end_time = end_time
 
@@ -126,7 +135,6 @@ class SignUpRole:
         return {
                 "title": self.title,
                 "needed_count": self.needed,
-                "date_string": self.date,
                 "start_time_string": self.start_time,
                 "end_time_string": self.end_time
             }
@@ -136,7 +144,6 @@ class SignUpRole:
     def get_testing_role_string(self):
         return f"Title: {self.title}" + "\n" + \
             f"   Status: {self.needed}" + "\n" + \
-            f"   Date: {self.date}" + "\n" + \
             f"   Time: {self.start_time} - {self.end_time}"
    
     def get_notification_role_string(self):      
@@ -144,8 +151,17 @@ class SignUpRole:
         if self.full():
             status_string = f"Full slots"
 
-        return f"{status_string} on {self.date}" + \
-                f" from {self.start_time} to {self.end_time}"
+        notification_string = f"{status_string}"
+
+        if self.start_time != 0:
+            notification_string += f" on {self.get_time_object().strftime('%m/%d/%Y')}"
+            if self.end_time != 0:
+                start_time_string = self.get_time_object().strftime("%-I:%M %p")
+                end_time_string = self.get_end_time_object().strftime("%-I:%M %p")
+                notification_string += f" from {start_time_string} to {end_time_string}"
+                        
+        return notification_string
+    
 
     def get_time_object(self):
         return datetime.datetime.fromtimestamp(self.start_time)
@@ -192,7 +208,9 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
                 signup_json["signupurl"],
                 signup_json["signupid"],
                 signup_json["title"],
-                signup_json["contactname"]
+                signup_json["contactname"],
+                signup_json["starttime"],
+                signup_json["endtime"]
             )
 
             signups.append(signup)
@@ -200,28 +218,37 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
     if with_roles:
         for signup in signups:
             signup.set_roles(get_signup_roles_available(signup_genius_token, signup.id))
+
+        
+            for role in signup.roles:
+                print(role.get_testing_role_string())
     
     return signups
 
         
 def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     roles = []
-
+    
+    params = {
+        "user_key": signup_genius_token
+    }
     roles_request = r.get(
-        f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}",
-        {"user_key": signup_genius_token}
-    )
+        f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params)
 
     if roles_request.ok:
+        print("Roles request was ok")
         roles_array = roles_request.json()["data"]["signup"]
         for role_json in roles_array:
             roles.append(SignUpRole(
                 role_json["item"],
                 role_json["myqty"], # Gives the amount of people NEEDED
                 role_json["startdate"], # All the times below can be '0' (same as None)
-                role_json["starttime"],
-                role_json["endtime"]
+                role_json["enddate"]
             ))
+    else:
+        print(roles_request.status_code)
+        print(roles_request.url)
 
+    
     return roles
 

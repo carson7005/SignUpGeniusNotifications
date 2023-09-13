@@ -3,21 +3,31 @@ from util import notif_util as nutil, \
 import schedule
 import time
 import traceback
+import json
 
 def hourly_job():
-    nutil.send_notification(hours_out=2, hours_from=1, include_full=False, include_when=True)
+    nutil.send_notification(get_config_item("signup_genius_token"),
+                            hours_out=2,
+                            hours_from=1,
+                            include_full=False,
+                            include_when=True)
     lutil.log("Hourly job done.")
 
 def daily_job():
-    nutil.send_notification(days_out=1, include_full=False, include_when=True)
+    nutil.send_notification(get_config_item("signup_genius_token"),
+                            days_out=1,
+                            include_full=False,
+                            include_when=True)
     lutil.log("Daily job done.")
 
 def weekly_job():
-    nutil.send_weekly_notification()
+    nutil.send_weekly_notification(get_config_item("signup_genius_token"))
     lutil.log("Weekly job done.")
 
 
 def main():
+    
+    
     lutil.log("Starting script...")
 
     schedule.every().hour.at(":15").do(hourly_job)
@@ -45,3 +55,11 @@ if __name__ == "__main__":
         
     lutil.handle_logger_close()
 
+
+def get_config_item(key):
+    config_file = open("config.json")
+    data = json.load(config_file)
+    config_file.close()
+
+    return data[key]
+    

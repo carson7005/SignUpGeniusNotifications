@@ -64,7 +64,8 @@ def get_signups_to_notify(signup_genius_token,
     return signups
 
 
-def send_notification(days_out=None,
+def send_notification(signup_genius_token,
+                      days_out=None,
                       days_from=0,
                       hours_out=None,
                       hours_from=0,
@@ -75,7 +76,8 @@ def send_notification(days_out=None,
         lutil.log("No ending time given, skipping notification.")
         return
 
-    notif_message, signup_count = get_notification_message(days_out=days_out,
+    notif_message, signup_count = get_notification_message(signup_genius_token,
+                                                           days_out=days_out,
                                                            days_from=days_from,
                                                            hours_out=hours_out,
                                                            hours_from=hours_from,
@@ -102,7 +104,6 @@ def send_notification(days_out=None,
 
 
 
-def send_weekly_notification():
-    send_notification(days_out=7, override_title="Weekly")
-
+def send_weekly_notification(signup_genius_token):
+    send_notification(signup_genius_token, days_out=7, override_title="Weekly")
 
