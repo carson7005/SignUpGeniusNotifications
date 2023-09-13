@@ -215,14 +215,17 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
 
             signups.append(signup)
 
+            lutil.log(f"Fetched signup '{signup.title}' with the ID '{signup.id}'")
+    else:
+        lutil.log(f"Unable to execute signup request. Status Code: {signups_request.status_code}")
+
     if with_roles:
         for signup in signups:
             signup.set_roles(get_signup_roles_available(signup_genius_token, signup.id))
 
-        
-            for role in signup.roles:
-                print(role.get_testing_role_string())
-    
+            lutil.log(f"Set roles for signup '{signup.title}'")
+
+
     return signups
 
         
@@ -236,7 +239,6 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
         f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params)
 
     if roles_request.ok:
-        print("Roles request was ok")
         roles_array = roles_request.json()["data"]["signup"]
         for role_json in roles_array:
             roles.append(SignUpRole(
@@ -246,9 +248,8 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
                 role_json["enddate"]
             ))
     else:
-        print(roles_request.status_code)
-        print(roles_request.url)
-
+        lutil.log(f"Unable to execute roles request for signup '{signup_id}'. \
+                    Status Code: '{roles_request.status_code}'")
     
     return roles
 

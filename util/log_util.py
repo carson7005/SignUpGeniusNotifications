@@ -3,7 +3,7 @@ import os
 
 def log(message):
     now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
+    current_time = now.strftime("%m/%d/%Y %H:%M:%S")
     log_message = f"[{current_time}]: {message}"
     if not os.path.exists("logs/"):
         os.mkdir("logs/")

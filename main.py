@@ -49,6 +49,7 @@ if __name__ == "__main__":
     try:
         main()
     except BaseException as e:
+        lutil.log("Exception Thrown:")
         traceback.print_exc()
         
     lutil.handle_logger_close()
