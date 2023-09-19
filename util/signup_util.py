@@ -1,6 +1,8 @@
 from util import log_util as lutil
 import datetime
 import requests as r
+import json
+import re
 
 
 class SignUp:
@@ -202,7 +204,19 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
     )
 
     if signups_request.ok:
-        signups_array = signups_request.json()["data"]
+        found_json = None
+        while found_json == None:
+            try:
+                current_try = signups_request.json()
+                found_json = current_try
+            except json.decoder.JSONDecodeError:
+                signups_request = r.get(
+                    f"{BASE_SIGNUP_GENIUS_URL}/signups/created/active/",
+                    {"user_key": signup_genius_token}
+                )
+                continue
+                
+        signups_array = found_json["data"]
         for signup_json in signups_array:
             signup = SignUp(
                 signup_json["signupurl"],
@@ -239,7 +253,18 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
         f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params)
 
     if roles_request.ok:
-        roles_array = roles_request.json()["data"]["signup"]
+        found_json = None
+        while found_json == None:
+            try:
+                current_try = roles_request.json()
+                found_json = current_try
+            except json.decoder.JSONDecodeError:
+                roles_request = r.get(
+                    f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params
+                )
+                continue
+            
+        roles_array = found_json["data"]["signup"]
         for role_json in roles_array:
             roles.append(SignUpRole(
                 role_json["item"],
@@ -253,3 +278,22 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     
     return roles
 
+
+def fix_response_str(response):
+    print("TODO")
+
+
+def get_text_inside_brackets(input, start_index):
+    checking_string: str = input[start_index:]
+    if not "{" in checking_string: return checking_string
+
+    start_index = checking_string.find("{")
+
+    for i in range(len(checking_string) - 1 - start_index):
+        print("TODO")
+
+    other_count, start, end = 0, 0, 0
+
+    
+
+    

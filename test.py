@@ -6,6 +6,7 @@ def main():
     config_file = open("config.json")
     data = json.load(config_file)
     token = data["signup_genius_token"]
+    testing_canvas = data["testing_canvas_course"]
     config_file.close()
 
     
@@ -17,8 +18,8 @@ def main():
 
     
     nutil.send_notification(token,
-                            hours_out=2,
-                            hours_from=1,
+                            testing_canvas,
+                            days_out=2,
                             include_full=False,
                             include_when=True)
 

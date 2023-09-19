@@ -65,6 +65,7 @@ def get_signups_to_notify(signup_genius_token,
 
 
 def send_notification(signup_genius_token,
+                      canvas_course_id,
                       days_out=None,
                       days_from=0,
                       hours_out=None,
@@ -97,13 +98,12 @@ def send_notification(signup_genius_token,
     notif_title = f"{override_title if override_title else notif_status[0]}" + \
             f" Update for SignUps ({current_date_str})"
     notif_message = notif_title + "<br>" + notif_message
-    default_course = cutil.get_notification_course_id()
-    cutil.send_announcement(default_course, notif_title, notif_message)
+    cutil.send_announcement(canvas_course_id, notif_title, notif_message)
 
     lutil.log(f"{notif_status[0]} Update ({notif_status[1]}) sent.")
 
 
 
-def send_weekly_notification(signup_genius_token):
-    send_notification(signup_genius_token, days_out=7, override_title="Weekly")
+def send_weekly_notification(signup_genius_token, canvas_course_id):
+    send_notification(signup_genius_token, canvas_course_id, days_out=7, override_title="Weekly")
 
