@@ -1,4 +1,4 @@
-from util import log_util as lutil
+from util import log_util as lutil, config_util
 import datetime
 import requests as r
 import json
@@ -156,7 +156,15 @@ class SignUpRole:
         notification_string = f"{status_string}"
 
         if self.start_time != 0:
-            notification_string += f" on {self.get_time_object().strftime('%m/%d/%Y')}"
+            days_until = self.get_days_until()
+
+            if days_until < 1:
+                notification_string += f" <b>TODAY</b> ({self.get_time_object().strftime('%m/%d/%Y')})"
+            elif days_until < 2:
+                notification_string += f" <b>TOMORROW</b> ({self.get_time_object().strftime('%m/%d/%Y')})"
+            else:
+                notification_string += f" on {self.get_time_object().strftime('%m/%d/%Y')}"
+            
             if self.end_time != 0:
                 start_time_string = self.get_time_object().strftime("%-I:%M %p")
                 end_time_string = self.get_end_time_object().strftime("%-I:%M %p")
@@ -198,25 +206,14 @@ def fix_signupgenius_url(url):
 def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
     signups = []
     
-    signups_request = r.get(
+
+    signups_json, signups_status_code = try_json_request(
         f"{BASE_SIGNUP_GENIUS_URL}/signups/created/active/",
         {"user_key": signup_genius_token}
     )
 
-    if signups_request.ok:
-        found_json = None
-        while found_json == None:
-            try:
-                current_try = signups_request.json()
-                found_json = current_try
-            except json.decoder.JSONDecodeError:
-                signups_request = r.get(
-                    f"{BASE_SIGNUP_GENIUS_URL}/signups/created/active/",
-                    {"user_key": signup_genius_token}
-                )
-                continue
-                
-        signups_array = found_json["data"]
+    if signups_json != None:
+        signups_array = signups_json["data"]
         for signup_json in signups_array:
             signup = SignUp(
                 signup_json["signupurl"],
@@ -231,7 +228,7 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
 
             lutil.log(f"Fetched signup '{signup.title}' with the ID '{signup.id}'")
     else:
-        lutil.log(f"Unable to execute signup request. Status Code: {signups_request.status_code}")
+        lutil.log(f"Unable to execute signup request. Status Code: {signups_status_code}")
 
     if with_roles:
         for signup in signups:
@@ -249,22 +246,13 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     params = {
         "user_key": signup_genius_token
     }
-    roles_request = r.get(
-        f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params)
 
-    if roles_request.ok:
-        found_json = None
-        while found_json == None:
-            try:
-                current_try = roles_request.json()
-                found_json = current_try
-            except json.decoder.JSONDecodeError:
-                roles_request = r.get(
-                    f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/", params
-                )
-                continue
-            
-        roles_array = found_json["data"]["signup"]
+    roles_request_url = f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/"
+
+    roles_json, roles_status_code = try_json_request(roles_request_url, params)
+
+    if roles_json != None:
+        roles_array = roles_json["data"]["signup"]
         for role_json in roles_array:
             roles.append(SignUpRole(
                 role_json["item"],
@@ -274,26 +262,36 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
             ))
     else:
         lutil.log(f"Unable to execute roles request for signup '{signup_id}'. \
-                    Status Code: '{roles_request.status_code}'")
+                    Status Code: '{roles_status_code}'")
     
     return roles
 
 
-def fix_response_str(response):
-    print("TODO")
+def try_json_request(url, params):
+    current_try = 0
+    found_json = None
+    status_code = 0
 
-
-def get_text_inside_brackets(input, start_index):
-    checking_string: str = input[start_index:]
-    if not "{" in checking_string: return checking_string
-
-    start_index = checking_string.find("{")
-
-    for i in range(len(checking_string) - 1 - start_index):
-        print("TODO")
-
-    other_count, start, end = 0, 0, 0
-
+    tries = config_util.get_config_item("request_retries")
     
+    while current_try < tries:
+        json_request = r.get(url, params)
+        status_code = json_request.status_code
 
-    
+        if json_request.ok:
+            try:
+                found_json = json_request.json()
+                break
+            except json.decoder.JSONDecodeError:
+                lutil.log(f"Error fetching JSON response for URL: {url} (failed at try {current_try})")
+
+                if current_try != tries - 1:
+                    lutil.log(f"Retrying JSON request for URL: {url}")
+
+                continue
+        else:
+            break
+
+
+    return found_json, status_code
+           

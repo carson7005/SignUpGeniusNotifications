@@ -1,5 +1,6 @@
 from util import notif_util as nutil, \
-    log_util as lutil, canvas_util as cutil
+    log_util as lutil, canvas_util as cutil, \
+    config_util
 import schedule
 import time
 import traceback
@@ -7,7 +8,7 @@ import json
 
 
 def hourly_job():
-    conf = get_config()
+    conf = config_util.get_config()
     
     nutil.send_notification(conf["signup_genius_token"],
                             conf["default_canvas_course"],
@@ -19,7 +20,7 @@ def hourly_job():
 
 
 def daily_job():
-    conf = get_config()
+    conf = config_util.get_config()
     
     nutil.send_notification(conf["signup_genius_token"],
                             conf["default_canvas_course"],
@@ -30,29 +31,18 @@ def daily_job():
 
 
 def weekly_job():
-    conf = get_config()
+    conf = config_util.get_config()
     
     nutil.send_weekly_notification(conf["signup_genius_token"], conf["default_canvas_course"])
     lutil.log("Weekly job done.")
 
 
-def get_config():
-    config_file = open("config.json")
-    data = json.load(config_file)
-    config_file.close()
-
-    return data
-
-
-def get_config_item(key):
-    return get_config()[key]
-
 
 def main():
     lutil.log("Starting script...")
 
-    daily_time = get_config_item("daily_time")
-    hourly_minute = get_config_item("hourly_minute")
+    daily_time = config_util.get_config_item("daily_time")
+    hourly_minute = config_util.get_config_item("hourly_minute")
 
     # schedule.every().hour.at(hourly_minute).do(hourly_job)
 

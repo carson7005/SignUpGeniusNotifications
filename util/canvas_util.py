@@ -1,20 +1,14 @@
 import requests
 import json
+from util import config_util
 
 BASE_URL = "https://dexterschools.instructure.com/api/v1"
 
 def get_notification_course_id():
-    token_file = open("config.json")
-    data = json.load(token_file)
-    course_id = data["default_canvas_course"]
-    token_file.close()
-
-    return course_id
+    return config_util.get_config_item("default_canvas_course")
 
 def send_announcement(course_id, title, message, is_published=True):
-    token_file = open("config.json")
-    data = json.load(token_file)
-    token = data["canvas_token"]
+    token = config_util.get_config_item("canvas_token")
 
     PARAMS = {
             "access_token": token,
@@ -25,5 +19,4 @@ def send_announcement(course_id, title, message, is_published=True):
         }
 
     r = requests.post(f"{BASE_URL}/courses/{course_id}/discussion_topics", PARAMS)
-    token_file.close()
     return r.json()
