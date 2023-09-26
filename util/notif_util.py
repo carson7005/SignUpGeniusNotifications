@@ -1,6 +1,7 @@
 from util import signup_util as sutil, \
     canvas_util as cutil, \
-    log_util as lutil
+    log_util as lutil, \
+    config_util
 from datetime import date, timedelta
 
 
@@ -30,10 +31,20 @@ def get_notification_message(signup_genius_token,
                                                    include_full=include_full,
                                                    include_time_detail=include_when)
 
+    contact_emails = config_util.get_config_item("contacts")
+    contacts_string = f"{contact_emails[0][0]} (" + \
+        f"<a href='mailto:{contact_emails[0][1]}'>{contact_emails[0][1]}</a>)"
+    for i in range(1, len(contact_emails)):
+        if len(contact_emails) > 2: contacts_string += ", "
+
+        if(i == len(contact_emails) - 1): contacts_string += "or "
+
+        contacts_string += f"{contact_emails[i][0]} (" + \
+            f"<a href='mailto:{contact_emails[i][1]}'>{contact_emails[i][1]}</a>)"
+        
     contact_email = "joshua.fernandez@dexterschools.org"
     notif_message += "\n<hr>\n" + "Is there anything incorrect with this " + \
-        "notification? If so, please contact Josh Fernandez (" + \
-        f"<a href='mailto:{contact_email}'>{contact_email}</a>)" + "\n"
+        f"notification? If so, please contact {contacts_string} \n"
     
     notif_message = notif_message.replace("\n", "<br>")
 
