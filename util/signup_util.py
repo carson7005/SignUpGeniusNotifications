@@ -281,12 +281,14 @@ def try_json_request(url, params):
         if json_request.ok:
             try:
                 found_json = json_request.json()
+                lutil.log(f"Successful JSON response for URL: {url} during try {current_try}")
                 break
             except json.decoder.JSONDecodeError:
                 lutil.log(f"Error fetching JSON response for URL: {url} (failed at try {current_try})")
 
                 if current_try != tries - 1:
                     lutil.log(f"Retrying JSON request for URL: {url}")
+                    current_try += 1
 
                 continue
         else:
