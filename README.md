@@ -9,6 +9,7 @@ A connection between SignupGenius and Canvas LMS to send updates to a certain co
   "signup_genius_token": "str; SignUpGenius Token here",
   "daily_time": "str; Time time for the daily updates, in the format '%H:%M' (ex. 07:00, 13:30)",
   "hourly_minute": "str; Minute marker for the hourly updates, in the format ':%M' (ex. :05, :15)",
+  "weekly_update_day": "str; The day of the week that the weekly update will send on, in the format '%A' (ex. Monday, Tuesday, ...)",
   "request_retries": "int; The amount of retry attempts for the SG API calls",
   "contacts": "[[str]]; The contacts for the notification string, formatted [['NAME', 'EMAIL'], ...]"
 }

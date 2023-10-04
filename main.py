@@ -5,6 +5,7 @@ import schedule
 import time
 import traceback
 import json
+import datetime
 
 
 def hourly_job():
@@ -20,7 +21,16 @@ def hourly_job():
 
 
 def daily_job():
+    lutil.log("Starting daily job...")
+    
     conf = config_util.get_config()
+
+    now = datetime.datetime.now()
+
+    if now.strftime("%A") == conf["weekly_update_day"]:
+        lutil.log("Moving to weekly job...")
+        weekly_job()
+        return
     
     nutil.send_notification(conf["signup_genius_token"],
                             conf["default_canvas_course"],
@@ -31,6 +41,8 @@ def daily_job():
 
 
 def weekly_job():
+    lutil.log("Starting weekly job...")
+    
     conf = config_util.get_config()
     
     nutil.send_weekly_notification(conf["signup_genius_token"], conf["default_canvas_course"])
@@ -46,14 +58,7 @@ def main():
 
     # schedule.every().hour.at(hourly_minute).do(hourly_job)
 
-    schedule.every().sunday.at(daily_time).do(daily_job)
-    schedule.every().tuesday.at(daily_time).do(daily_job)
-    schedule.every().wednesday.at(daily_time).do(daily_job)
-    schedule.every().thursday.at(daily_time).do(daily_job)
-    schedule.every().friday.at(daily_time).do(daily_job)
-    schedule.every().saturday.at(daily_time).do(daily_job)
-
-    schedule.every().monday.at(daily_time).do(weekly_job)
+    schedule.every().day.at(daily_time).do(daily_job)
 
     while True:
         schedule.run_pending()
