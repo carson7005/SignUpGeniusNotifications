@@ -3,6 +3,7 @@ import datetime
 import requests as r
 import json
 import re
+import math
 
 
 class SignUp:
@@ -189,7 +190,15 @@ class SignUpRole:
         return ((self.get_time_object() - datetime.datetime.now()).total_seconds()) / 3600
 
     def get_days_until(self):
-        return self.get_hours_until() / 24
+        if self.has_ended():
+            return -1
+        
+        return (get_date_object_without_time(self.get_time_object()) - get_date_object_without_time(datetime.datetime.now())).days
+
+    
+
+def get_date_object_without_time(date_object):
+    return datetime.datetime.strptime(date_object.strftime('%m/%d/%Y'), '%m/%d/%Y')
 
 
 BASE_SIGNUP_GENIUS_URL = "https://api.signupgenius.com/v2/k"
