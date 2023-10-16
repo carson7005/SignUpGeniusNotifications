@@ -158,13 +158,13 @@ class SignUpRole:
 
         if self.start_time != 0:
             days_until = self.get_days_until()
-
+            mdy = self.get_time_object().strftime('%m/%d/%Y')
             if days_until < 1:
-                notification_string += f" <b>TODAY</b> ({self.get_time_object().strftime('%m/%d/%Y')})"
+                notification_string += f" <b>TODAY</b> ({mdy})"
             elif days_until < 2:
-                notification_string += f" <b>TOMORROW</b> ({self.get_time_object().strftime('%m/%d/%Y')})"
+                notification_string += f" <b>TOMORROW</b> ({mdy})"
             else:
-                notification_string += f" on {self.get_time_object().strftime('%m/%d/%Y')}"
+                notification_string += f" on <b>{self.get_time_object().strftime('%A')}</b> ({mdy})"
             
             if self.end_time != 0:
                 start_time_string = self.get_time_object().strftime("%-I:%M %p")
