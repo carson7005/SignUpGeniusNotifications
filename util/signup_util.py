@@ -195,13 +195,13 @@ class SignUpRole:
         
         return (get_date_object_without_time(self.get_time_object()) - get_date_object_without_time(datetime.datetime.now())).days
 
-    
 
 def get_date_object_without_time(date_object):
     return datetime.datetime.strptime(date_object.strftime('%m/%d/%Y'), '%m/%d/%Y')
 
 
 BASE_SIGNUP_GENIUS_URL = "https://api.signupgenius.com/v2/k"
+
 
 def fix_signupgenius_url(url):
     if "signupgenius.com" not in url:
@@ -224,18 +224,37 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
     if signups_json != None:
         signups_array = signups_json["data"]
         for signup_json in signups_array:
+            signup_id = signup_json["signupid"]
+            signup_title = signup_json["title"]
+            
+            signup_start = signup_json["starttime"]
+            signup_end = signup_json["endtime"]
+
+            if signup_start == 0:
+                lutil.log(f"'starttime' for '{signup_title}' ({signup_id}) is 0. Setting time to 'startdate'")
+                signup_start = signup_json["startdate"]
+
+            if signup_end == 0:
+                lutil.log(f"'endtime' for '{signup_title}' ({signup_id}) is 0. Setting time to 'enddate'")
+                signup_end = signup_json["enddate"]
+
+            # Sets them to the other time if they're 0, but still allows
+            # for the possibility of a "0" or None value for the time.
+            # This is just to double check the other time values, since
+            # the docs aren't very clear.
+            
             signup = SignUp(
                 signup_json["signupurl"],
-                signup_json["signupid"],
-                signup_json["title"],
+                signup_id,
+                signup_title,
                 signup_json["contactname"],
-                signup_json["starttime"],
-                signup_json["endtime"]
+                signup_start,
+                signup_end
             )
 
             signups.append(signup)
 
-            lutil.log(f"Fetched signup '{signup.title}' with the ID '{signup.id}'")
+            lutil.log(f"Fetched signup '{signup_title}' with the ID '{signup_id}'")
     else:
         lutil.log(f"Unable to execute signup request. Status Code: {signups_status_code}")
 
@@ -263,12 +282,33 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     if roles_json != None:
         roles_array = roles_json["data"]["signup"]
         for role_json in roles_array:
+            role_title = role_json["item"]
+            
+            role_start = role_json["startdate"]
+            role_end = role_json["enddate"]
+            # These assignments are flipped from the assignment
+            # under the Signup times, since the pattern at the time of
+            # writing has been that the "date" time returns an actual
+            # value for the Roles, but not the Signups
+
+            if role_start == 0:
+                lutil.log(f"'startdate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'starttime'")
+                role_start = role_json["starttime"]
+                
+            if role_end == 0:
+                lutil.log(f"'enddate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'endtime'")
+                role_end = role_json["endtime"]
+            # Again, this still leaves the possibility for a "0" or None
+            # value for the time
+            
             roles.append(SignUpRole(
-                role_json["item"],
+                role_title,
                 role_json["myqty"], # Gives the amount of people NEEDED
-                role_json["startdate"], # All the times below can be '0' (same as None)
-                role_json["enddate"]
+                role_start,
+                role_end
             ))
+
+            lutil.log(f"Added role '{role_title}' for signup {signup_id} starting on {datetime.datetime.fromtimestamp(role_start).strftime('%m/%d/%Y')}")
     else:
         lutil.log(f"Unable to execute roles request for signup '{signup_id}'. \
                     Status Code: '{roles_status_code}'")
