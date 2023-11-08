@@ -1,14 +1,14 @@
 from datetime import datetime
 import os
 
-def log(message):
+def log(message, file_path="latest.txt"):
     now = datetime.now()
     current_time = now.strftime("%m/%d/%Y %H:%M:%S")
     log_message = f"[{current_time}]: {message}"
     if not os.path.exists("logs/"):
         os.mkdir("logs/")
 
-    with open("logs/latest.txt", "a") as log_file:
+    with open(f"logs/{file_path}", "a") as log_file:
         log_file.write("\n" + log_message)
 
     print(log_message)

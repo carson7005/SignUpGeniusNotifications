@@ -17,6 +17,23 @@ class SignUp:
         self.general_end_time = general_end_time
 
         self.roles = []
+
+    def from_json(json_object):
+        roles = []
+        for role in json_object["roles"]: roles.append(SignUpRole.from_json(role))
+            
+        signup = SignUp(
+            json_object["url"],
+            json_object["id"],
+            json_object["title"],
+            json_object["author"],
+            json_object["start_time"],
+            json_object["end_time"]
+        )
+
+        signup.set_roles(roles)
+
+        return signup
         
 
     def to_json(self):
@@ -29,6 +46,8 @@ class SignUp:
                 "id": self.id,
                 "title": self.title,
                 "author": self.author,
+                "start_time": self.general_start_time, # <--------------------------------------------------
+                "end_time": self.general_end_time,     # Working on storing and serializing JSON to Object
                 "roles": roles_json_array
             }
 
@@ -134,12 +153,20 @@ class SignUpRole:
         self.start_time = start_time
         self.end_time = end_time
 
+    def from_json(json_object):
+        return SignUpRole(
+            json_object["title"],
+            json_object["needed_count"],
+            json_object["start_time"],
+            json_object["end_time"]
+        )
+
     def to_json(self):
         return {
                 "title": self.title,
                 "needed_count": self.needed,
-                "start_time_string": self.start_time,
-                "end_time_string": self.end_time
+                "start_time": self.start_time,
+                "end_time": self.end_time
             }
     
     def full(self): return self.needed == 0
@@ -212,13 +239,14 @@ def fix_signupgenius_url(url):
     return new_url
 
 
-def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
+def get_current_signups(signup_genius_token, with_roles=True, log_file_path="latest.txt") -> [SignUp]:
     signups = []
     
 
     signups_json, signups_status_code = try_json_request(
         f"{BASE_SIGNUP_GENIUS_URL}/signups/created/active/",
-        {"user_key": signup_genius_token}
+        {"user_key": signup_genius_token},
+        log_file_path
     )
 
     if signups_json != None:
@@ -231,11 +259,11 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
             signup_end = signup_json["endtime"]
 
             if signup_start == 0:
-                lutil.log(f"'starttime' for '{signup_title}' ({signup_id}) is 0. Setting time to 'startdate'")
+                lutil.log(f"'starttime' for '{signup_title}' ({signup_id}) is 0. Setting time to 'startdate'", log_file_path)
                 signup_start = signup_json["startdate"]
 
             if signup_end == 0:
-                lutil.log(f"'endtime' for '{signup_title}' ({signup_id}) is 0. Setting time to 'enddate'")
+                lutil.log(f"'endtime' for '{signup_title}' ({signup_id}) is 0. Setting time to 'enddate'", log_file_path)
                 signup_end = signup_json["enddate"]
 
             # Sets them to the other time if they're 0, but still allows
@@ -254,21 +282,21 @@ def get_current_signups(signup_genius_token, with_roles=True) -> [SignUp]:
 
             signups.append(signup)
 
-            lutil.log(f"Fetched signup '{signup_title}' with the ID '{signup_id}'")
+            lutil.log(f"Fetched signup '{signup_title}' with the ID '{signup_id}'", log_file_path)
     else:
-        lutil.log(f"Unable to execute signup request. Status Code: {signups_status_code}")
+        lutil.log(f"Unable to execute signup request. Status Code: {signups_status_code}", log_file_path)
 
     if with_roles:
         for signup in signups:
-            signup.set_roles(get_signup_roles_available(signup_genius_token, signup.id))
+            signup.set_roles(get_signup_roles_available(signup_genius_token, signup.id, log_file_path))
 
-            lutil.log(f"Set roles for signup '{signup.title}'")
+            lutil.log(f"Set roles for signup '{signup.title}'", log_file_path)
 
 
     return signups
 
         
-def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
+def get_signup_roles_available(signup_genius_token, signup_id, log_file_path="latest.txt") -> [SignUpRole]:
     roles = []
     
     params = {
@@ -278,8 +306,8 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     roles_request_url = f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/"
     filled_roles_request_url = f"{BASE_SIGNUP_GENIUS_URL}/signups/report/filled/{signup_id}/"
 
-    roles_json, roles_status_code = try_json_request(roles_request_url, params)
-    filled_roles_json, filled_roles_status_code = try_json_request(filled_roles_request_url, params)
+    roles_json, roles_status_code = try_json_request(roles_request_url, params, log_file_path)
+    filled_roles_json, filled_roles_status_code = try_json_request(filled_roles_request_url, params, log_file_path)
 
     roles_to_check = []
 
@@ -288,7 +316,7 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
         for role_json in roles_array: roles_to_check.append(role_json)
     else:
         lutil.log(f"Unable to execute available roles request for signup '{signup_id}'. \
-                    Status Code: '{roles_status_code}'")
+                    Status Code: '{roles_status_code}'", log_file_path)
 
     
     if filled_roles_json != None:
@@ -298,7 +326,7 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
             roles_to_check.append(filled_role_json)
     else:
         lutil.log(f"Unable to execute filled roles request for signup '{signup_id}'. \
-                    Status Code: '{filled_roles_status_code}'")
+                    Status Code: '{filled_roles_status_code}'", log_file_path)
 
     for role_json in roles_to_check:
         role_title = role_json["item"]
@@ -311,11 +339,11 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
         # value for the Roles, but not the Signups
 
         if role_start == 0:
-            lutil.log(f"'startdate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'starttime'")
+            lutil.log(f"'startdate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'starttime'", log_file_path)
             role_start = role_json["starttime"]
     
         if role_end == 0:
-            lutil.log(f"'enddate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'endtime'")
+            lutil.log(f"'enddate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'endtime'", log_file_path)
             role_end = role_json["endtime"]
         # Again, this still leaves the possibility for a "0" or None
         # value for the time
@@ -327,12 +355,12 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
             role_end
         ))
 
-        lutil.log(f"Added role '{role_title}' for signup {signup_id} starting on {datetime.datetime.fromtimestamp(role_start).strftime('%m/%d/%Y')}")
+        lutil.log(f"Added role '{role_title}' for signup {signup_id} starting on {datetime.datetime.fromtimestamp(role_start).strftime('%m/%d/%Y')}", log_file_path)
     
     return roles
 
 
-def try_json_request(url, params):
+def try_json_request(url, params, log_file_path="latest.txt"):
     current_try = 0
     found_json = None
     status_code = 0
@@ -346,13 +374,13 @@ def try_json_request(url, params):
         if json_request.ok:
             try:
                 found_json = json_request.json()
-                lutil.log(f"Successful JSON response for URL: {url} during try {current_try}")
+                lutil.log(f"Successful JSON response for URL: {url} during try {current_try}", log_file_path)
                 break
             except json.decoder.JSONDecodeError:
-                lutil.log(f"Error fetching JSON response for URL: {url} (failed at try {current_try})")
+                lutil.log(f"Error fetching JSON response for URL: {url} (failed at try {current_try})", log_file_path)
 
                 if current_try != tries - 1:
-                    lutil.log(f"Retrying JSON request for URL: {url}")
+                    lutil.log(f"Retrying JSON request for URL: {url}", log_file_path)
                     current_try += 1
 
                 continue
@@ -368,12 +396,13 @@ def get_signups_to_notify(signup_genius_token,
                           days_from=0,
                           hours_out=None,
                           hours_from=0,
-                          include_full=True):
+                          include_full=True,
+                          log_file_path="latest.txt") -> [SignUp]:
     if not days_out and not hours_out:
         return None
 
     signups = []
-    for signup in get_current_signups(signup_genius_token):
+    for signup in get_current_signups(signup_genius_token, log_file_path=log_file_path):
         roles = signup.get_roles(days_out=days_out,
                                  days_from=days_from,
                                  hours_out=hours_out,
