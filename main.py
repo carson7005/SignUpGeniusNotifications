@@ -51,7 +51,7 @@ def daily_job():
                             conf["default_canvas_course"],
                             days_out=1,
                             include_full=False,
-                            include_when=True)
+                            include_when=False) # No need to say "in the next 7 days"
 
     lutil.log("Daily job done.")
 

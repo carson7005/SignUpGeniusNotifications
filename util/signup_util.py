@@ -276,42 +276,58 @@ def get_signup_roles_available(signup_genius_token, signup_id) -> [SignUpRole]:
     }
 
     roles_request_url = f"{BASE_SIGNUP_GENIUS_URL}/signups/report/available/{signup_id}/"
+    filled_roles_request_url = f"{BASE_SIGNUP_GENIUS_URL}/signups/report/filled/{signup_id}/"
 
     roles_json, roles_status_code = try_json_request(roles_request_url, params)
+    filled_roles_json, filled_roles_status_code = try_json_request(filled_roles_request_url, params)
+
+    roles_to_check = []
 
     if roles_json != None:
         roles_array = roles_json["data"]["signup"]
-        for role_json in roles_array:
-            role_title = role_json["item"]
-            
-            role_start = role_json["startdate"]
-            role_end = role_json["enddate"]
-            # These assignments are flipped from the assignment
-            # under the Signup times, since the pattern at the time of
-            # writing has been that the "date" time returns an actual
-            # value for the Roles, but not the Signups
-
-            if role_start == 0:
-                lutil.log(f"'startdate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'starttime'")
-                role_start = role_json["starttime"]
-                
-            if role_end == 0:
-                lutil.log(f"'enddate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'endtime'")
-                role_end = role_json["endtime"]
-            # Again, this still leaves the possibility for a "0" or None
-            # value for the time
-            
-            roles.append(SignUpRole(
-                role_title,
-                role_json["myqty"], # Gives the amount of people NEEDED
-                role_start,
-                role_end
-            ))
-
-            lutil.log(f"Added role '{role_title}' for signup {signup_id} starting on {datetime.datetime.fromtimestamp(role_start).strftime('%m/%d/%Y')}")
+        for role_json in roles_array: roles_to_check.append(role_json)
     else:
-        lutil.log(f"Unable to execute roles request for signup '{signup_id}'. \
+        lutil.log(f"Unable to execute available roles request for signup '{signup_id}'. \
                     Status Code: '{roles_status_code}'")
+
+    
+    if filled_roles_json != None:
+        filled_roles_array = filled_roles_json["data"]["signup"]
+        for filled_role_json in filled_roles_array:
+            filled_role_json["myqty"] = 0 # Affirming this is the NEEDED quantity
+            roles_to_check.append(filled_role_json)
+    else:
+        lutil.log(f"Unable to execute filled roles request for signup '{signup_id}'. \
+                    Status Code: '{filled_roles_status_code}'")
+
+    for role_json in roles_to_check:
+        role_title = role_json["item"]
+            
+        role_start = role_json["startdate"]
+        role_end = role_json["enddate"]
+        # These assignments are flipped from the assignment
+        # under the Signup times, since the pattern at the time of
+        # writing has been that the "date" time returns an actual
+        # value for the Roles, but not the Signups
+
+        if role_start == 0:
+            lutil.log(f"'startdate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'starttime'")
+            role_start = role_json["starttime"]
+    
+        if role_end == 0:
+            lutil.log(f"'enddate' for role '{role_title}' under signup {signup_id} is 0. Setting time to 'endtime'")
+            role_end = role_json["endtime"]
+        # Again, this still leaves the possibility for a "0" or None
+        # value for the time
+
+        roles.append(SignUpRole(
+            role_title,
+            role_json["myqty"], # Gives the amount of people NEEDED
+            role_start,
+            role_end
+        ))
+
+        lutil.log(f"Added role '{role_title}' for signup {signup_id} starting on {datetime.datetime.fromtimestamp(role_start).strftime('%m/%d/%Y')}")
     
     return roles
 
