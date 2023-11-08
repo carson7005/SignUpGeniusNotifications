@@ -345,4 +345,28 @@ def try_json_request(url, params):
 
 
     return found_json, status_code
-           
+        
+
+def get_signups_to_notify(signup_genius_token,
+                          days_out=None,
+                          days_from=0,
+                          hours_out=None,
+                          hours_from=0,
+                          include_full=True):
+    if not days_out and not hours_out:
+        return None
+
+    signups = []
+    for signup in get_current_signups(signup_genius_token):
+        roles = signup.get_roles(days_out=days_out,
+                                 days_from=days_from,
+                                 hours_out=hours_out,
+                                 hours_from=hours_from,
+                                 include_full=include_full)
+
+        if not roles: continue
+
+        signups.append(signup)
+
+    return signups
+

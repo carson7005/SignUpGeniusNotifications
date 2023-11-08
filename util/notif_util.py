@@ -1,11 +1,10 @@
-from util import signup_util as sutil, \
-    canvas_util as cutil, \
+from util import canvas_util as cutil, \
     log_util as lutil, \
     config_util
 from datetime import date, timedelta
 
 
-def get_notification_message(signup_genius_token,
+def get_notification_message(input_signup_array,
                              days_out=None,
                              days_from=0,
                              hours_out=None,
@@ -17,13 +16,8 @@ def get_notification_message(signup_genius_token,
         return None
 
     notif_message = ""
-    signups_notify = get_signups_to_notify(signup_genius_token,
-                                           days_out=days_out,
-                                           days_from=days_from,
-                                           hours_out=hours_out,
-                                           hours_from=hours_from,
-                                           include_full=include_full)
-    for signup in signups_notify:
+    
+    for signup in input_signup_array:
         notif_message += signup.get_signup_message(days_out=days_out,
                                                    days_from=days_from,
                                                    hours_out=hours_out,
@@ -48,34 +42,10 @@ def get_notification_message(signup_genius_token,
     
     notif_message = notif_message.replace("\n", "<br>")
 
-    return notif_message, len(signups_notify)
+    return notif_message, len(input_signup_array)
 
 
-def get_signups_to_notify(signup_genius_token,
-                          days_out=None,
-                          days_from=0,
-                          hours_out=None,
-                          hours_from=0,
-                          include_full=True):
-    if not days_out and not hours_out:
-        return None
-
-    signups = []
-    for signup in sutil.get_current_signups(signup_genius_token):
-        roles = signup.get_roles(days_out=days_out,
-                                 days_from=days_from,
-                                 hours_out=hours_out,
-                                 hours_from=hours_from,
-                                 include_full=include_full)
-
-        if not roles: continue
-
-        signups.append(signup)
-
-    return signups
-
-
-def send_notification(signup_genius_token,
+def send_notification(input_signup_array,
                       canvas_course_id,
                       days_out=None,
                       days_from=0,
@@ -88,7 +58,7 @@ def send_notification(signup_genius_token,
         lutil.log("No ending time given, skipping notification.")
         return
 
-    notif_message, signup_count = get_notification_message(signup_genius_token,
+    notif_message, signup_count = get_notification_message(input_signup_array,
                                                            days_out=days_out,
                                                            days_from=days_from,
                                                            hours_out=hours_out,
@@ -114,7 +84,14 @@ def send_notification(signup_genius_token,
     lutil.log(f"{notif_status[0]} Update ({notif_status[1]}) sent.")
 
 
-
-def send_weekly_notification(signup_genius_token, canvas_course_id):
-    send_notification(signup_genius_token, canvas_course_id, days_out=7, override_title="Weekly")
+def send_weekly_notification(input_signup_array,
+                             canvas_course_id,
+                             include_full=True,
+                             include_when=False):
+    send_notification(input_signup_array,
+                      canvas_course_id,
+                      days_out=7,
+                      include_full=include_full,
+                      include_when=include_when,
+                      override_title="Weekly")
 
