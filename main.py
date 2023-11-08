@@ -51,7 +51,7 @@ def daily_job():
                             conf["default_canvas_course"],
                             days_out=1,
                             include_full=False,
-                            include_when=False) # No need to say "in the next 7 days"
+                            include_when=True)
 
     lutil.log("Daily job done.")
 
@@ -68,7 +68,7 @@ def weekly_job():
     nutil.send_weekly_notification(current_signups,
                                    conf["default_canvas_course"],
                                    include_full=False,
-                                   include_when=True)
+                                   include_when=False) # No need to say "in the next 7 days"
 
     lutil.log("Weekly job done.")
 
