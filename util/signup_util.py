@@ -18,6 +18,9 @@ class SignUp:
 
         self.roles = []
 
+    def get_url_id(self):
+        return self.url.split("https://www.signupgenius.com/go/")[1]
+
     def from_json(json_object):
         roles = []
         for role in json_object["roles"]: roles.append(SignUpRole.from_json(role))

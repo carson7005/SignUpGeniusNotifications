@@ -84,7 +84,7 @@ def add_signup_to_calendar(signup: SignUp, current_events: [Event]):
         event_already_made = False
         for event in current_events:
             if event.start.strftime("%m/%d/%Y") == current_role_start_string and \
-                signup.url in event.description:
+                signup.get_url_id() in event.description:
                 event_already_made = True
                 break
 
