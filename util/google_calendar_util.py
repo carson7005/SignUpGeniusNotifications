@@ -67,12 +67,16 @@ def timestamp_to_mdy_str(timestamp):
     return datetime.datetime.fromtimestamp(timestamp).strftime("%m/%d/%Y")
 
 
-def add_signups_to_calendar(signups: [SignUp], current_events: [Event]):
+def add_signups_to_calendar(signups: [SignUp], current_events: [Event]=None):
     for signup in signups:
-        add_signup_to_calendar(signup)
+        add_signup_to_calendar(signup, current_events)
     
 
-def add_signup_to_calendar(signup: SignUp, current_events: [Event]):
+def add_signup_to_calendar(signup: SignUp, current_events: [Event]=None):
+    if not current_events:
+        current_events = get_notification_calendar_events()
+
+    
     lutil.log(f"Adding signup {signup.title} to the notification google calendar")
     role_times_sorted = get_earliest_role_start_end_times(signup)
 
@@ -91,7 +95,7 @@ def add_signup_to_calendar(signup: SignUp, current_events: [Event]):
 
         if not event_already_made:
             lutil.log(f"No event made for '{signup.title}' on {date_key}")
-            signup_event = Event(f"{signup.title} [TESTING]",
+            signup_event = Event(f"{signup.title}",
                                  datetime.datetime.fromtimestamp(date_times["start"]),
                                  datetime.datetime.fromtimestamp(date_times["end"]),
                                  description=signup.url)

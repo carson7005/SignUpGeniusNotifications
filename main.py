@@ -1,6 +1,7 @@
 from util import notif_util as nutil, \
     log_util as lutil, canvas_util as cutil, \
-    config_util, signup_util as sutil
+    config_util, signup_util as sutil, \
+    google_calendar_util as gcutil
 import schedule
 import time
 import traceback
@@ -28,6 +29,8 @@ def hourly_job():
                             include_full=False,
                             include_when=True)
 
+    gcutil.add_signups_to_calendar(current_signups)
+
     lutil.log("Hourly job done.")
 
 
@@ -53,6 +56,8 @@ def daily_job():
                             include_full=False,
                             include_when=True)
 
+    gcutil.add_signups_to_calendar(current_signups)
+
     lutil.log("Daily job done.")
 
 
@@ -69,6 +74,8 @@ def weekly_job():
                                    conf["default_canvas_course"],
                                    include_full=False,
                                    include_when=False) # No need to say "in the next 7 days"
+
+    gcutil.add_signups_to_calendar(current_signups)
 
     lutil.log("Weekly job done.")
 
