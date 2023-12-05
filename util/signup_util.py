@@ -24,7 +24,7 @@ class SignUp:
     def from_json(json_object):
         roles = []
         for role in json_object["roles"]: roles.append(SignUpRole.from_json(role))
-            
+
         signup = SignUp(
             json_object["url"],
             json_object["id"],
@@ -37,20 +37,19 @@ class SignUp:
         signup.set_roles(roles)
 
         return signup
-        
 
     def to_json(self):
         roles_json_array = []
-        for r in self.roles:
-            roles_json_array.append(r.to_json())
+        for role in self.roles:
+            roles_json_array.append(role.to_json())
 
         return {
                 "url": self.url,
                 "id": self.id,
                 "title": self.title,
                 "author": self.author,
-                "start_time": self.general_start_time, # <--------------------------------------------------
-                "end_time": self.general_end_time,     # Working on storing and serializing JSON to Object
+                "start_time": self.general_start_time,
+                "end_time": self.general_end_time,
                 "roles": roles_json_array
             }
 
@@ -64,17 +63,22 @@ class SignUp:
                 
         self.roles = roles
 
-
-    def get_roles(self, days_out=None, days_from=0, hours_out=None, hours_from=0, include_full=True, include_ended=True):
+    def get_roles(self,
+                  days_out=None,
+                  days_from=0,
+                  hours_out=None,
+                  hours_from=0,
+                  include_full=True,
+                  include_ended=True):
         roles = self.roles
 
         if roles:
             if days_out:
-                roles = [r for r in roles if r.get_days_until() <= days_out and \
-                        r.get_days_until() >= days_from]
+                roles = [r for r in roles if r.get_days_until() <= days_out and
+                         r.get_days_until() >= days_from]
             elif hours_out:
-                roles = [r for r in roles if r.get_hours_until() <= hours_out and \
-                        r.get_hours_until() >= hours_from]
+                roles = [r for r in roles if r.get_hours_until() <= hours_out and
+                         r.get_hours_until() >= hours_from]
 
             if not include_full:
                 roles = [r for r in roles if not r.full()]
@@ -400,6 +404,7 @@ def get_signups_to_notify(signup_genius_token,
                           hours_out=None,
                           hours_from=0,
                           include_full=True,
+                          include_ended=True,
                           log_file_path="latest.txt") -> [SignUp]:
     if not days_out and not hours_out:
         return None
@@ -410,7 +415,8 @@ def get_signups_to_notify(signup_genius_token,
                                  days_from=days_from,
                                  hours_out=hours_out,
                                  hours_from=hours_from,
-                                 include_full=include_full)
+                                 include_full=include_full,
+                                 include_ended=include_ended)
 
         if not roles: continue
 

@@ -19,7 +19,8 @@ def hourly_job():
     current_signups = sutil.get_signups_to_notify(conf["signup_genius_token"],
                                                   hours_out=2,
                                                   hours_from=1,
-                                                  include_full=False)
+                                                  include_full=False,
+                                                  include_ended=False)
 
     
     nutil.send_notification(current_signups,
@@ -47,8 +48,9 @@ def daily_job():
         return
 
     current_signups = sutil.get_signups_to_notify(conf["signup_genius_token"],
-                                                days_out=1,
-                                                include_full=False)
+                                                  days_out=1,
+                                                  include_full=False,
+                                                  include_ended=False)
     
     nutil.send_notification(current_signups,
                             conf["default_canvas_course"],
@@ -68,7 +70,8 @@ def weekly_job():
 
     current_signups = sutil.get_signups_to_notify(conf["signup_genius_token"],
                                                   days_out=7,
-                                                  include_full=False)
+                                                  include_full=False,
+                                                  include_ended=False)
     
     nutil.send_weekly_notification(current_signups,
                                    conf["default_canvas_course"],
