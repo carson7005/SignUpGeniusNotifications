@@ -68,6 +68,9 @@ def timestamp_to_mdy_str(timestamp):
 
 
 def add_signups_to_calendar(signups: [SignUp], current_events: [Event]=None):
+    if not current_events:
+        current_events = get_notification_calendar_events()
+
     for signup in signups:
         add_signup_to_calendar(signup, current_events)
     
@@ -87,7 +90,9 @@ def add_signup_to_calendar(signup: SignUp, current_events: [Event]=None):
 
         event_already_made = False
         for event in current_events:
-            if event.start.strftime("%m/%d/%Y") == current_role_start_string and \
+            if event.description == None:
+                continue
+            elif event.start.strftime("%m/%d/%Y") == current_role_start_string and \
                 signup.get_url_id() in event.description:
                 event_already_made = True
                 break
