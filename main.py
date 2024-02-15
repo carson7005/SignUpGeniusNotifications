@@ -11,12 +11,12 @@ import datetime
 current_signups = []
 
 
-def hourly_job():
-    lutil.log("Starting hourly job...")
+def hourly_job(): #Function for the hourly job
+    lutil.log("Starting hourly job...") #Logs the text
     
-    conf = config_util.get_config()
-
-    current_signups = sutil.get_signups_to_notify(conf["signup_genius_token"],
+    conf = config_util.get_config() #gets the configuration
+    #
+    current_signups = sutil.get_signups_to_notify(conf["signup_genius_token"], 
                                                   hours_out=2,
                                                   hours_from=1,
                                                   include_full=False,
